@@ -3458,7 +3458,7 @@ function seed(){
   }
   DB.entries = out; DB.plan = plan; DB.karyawan = kar; DB.absensi = abs;
   DB.log = [];
-  const nama = ['Fajar','Rian','Admin BMKP'];
+  const nama = ['Fatah','Rian','Admin BMKP'];
   out.slice(-18).forEach(e=>{
     DB.log.push({ts:new Date(e.tgl+'T17:'+(10+Math.floor(Math.random()*40))+':00').toISOString(),
       who:nama[Math.floor(Math.random()*nama.length)], aksi:'progres', mode:'lapangan',
