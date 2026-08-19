@@ -247,6 +247,7 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
         <span>Petugas</span>
         <input type="text" id="petugas" placeholder="nama Anda" autocomplete="name">
       </span>
+      <button class="btn ghost sm" id="btnGantiPetugas" hidden>Bukan Anda? Ganti</button>
       <button class="btn ghost sm" id="btnPrint">Cetak / PDF</button>
       <button class="btn ghost sm" id="btnLock" hidden>Kunci menu terbatas</button>
       <input type="file" id="fileImport" accept=".json" hidden>
@@ -485,6 +486,10 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
   <!-- ============ LOG AKTIVITAS ============ -->
   <section class="panel" id="p-aktivitas" hidden>
     <div class="banner info">Setiap penyimpanan dicatat di sini beserta nama petugas dan waktunya. Gunakan halaman ini untuk menelusuri siapa yang mengubah apa bila ada angka yang meragukan.</div>
+    <div class="card mb"><div class="stripe" style="background:var(--brand)"></div>
+      <div class="card-h"><h2>Siapa saja yang membuka</h2><span class="note">termasuk yang hanya melihat</span></div>
+      <div class="card-b tw" id="siapaTable"></div></div>
+
     <div class="card"><div class="stripe" style="background:var(--slate2)"></div>
       <div class="card-h"><h2>Log aktivitas</h2>
         <div class="bar-actions" style="margin-left:auto">
@@ -631,14 +636,21 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
     <p class="gsub">PT. Bumimarga Kharisma Perkasa</p>
     <div id="gerbangPesan" class="banner info" hidden></div>
     <label class="field" style="text-align:left">
+      <span>Nama Anda</span>
+      <input type="text" id="gerbangNama" placeholder="mis. Fajar" autocomplete="name">
+      <span class="ghint" style="margin:5px 0 0;display:block">Kosongkan bila Anda punya sandi sendiri &mdash;
+        nama akan diambil otomatis dari server.</span>
+    </label>
+    <label class="field" style="text-align:left">
       <span>Kata sandi</span>
       <input type="password" id="gerbangSandi" placeholder="masukkan kata sandi" autocomplete="current-password">
     </label>
     <label class="gingat"><input type="checkbox" id="gerbangIngat" checked>
       <span>Ingat saya di perangkat ini</span></label>
     <button class="btn primary" id="gerbangMasukBtn" style="width:100%;margin-top:6px">Masuk</button>
-    <p class="ghint">Sandi lapangan untuk admin penginput. Sandi manajemen untuk melihat nilai rupiah
-      dan mengubah data. Keduanya dibuat lewat menu <b>BMKP Insulation &rarr; Atur Kata Sandi</b> di Spreadsheet.</p>
+    <p class="ghint">Nama Anda tercatat pada setiap pembukaan dan setiap penyimpanan, dan bisa dilihat
+      di menu <b>Log aktivitas</b>. Sandi lapangan untuk admin penginput; sandi manajemen untuk melihat
+      nilai rupiah dan mengubah data.</p>
   </div>
 </div>
 
@@ -659,7 +671,7 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
    #                                                                 #
    ################################################################### */
 
-var SERVER_URL = 'https://script.google.com/macros/s/AKfycbx7Zt6cd6WgHZ6DlaE4rsjeAP9p99adKAbLuw6nTZcge_1mFYTJ9JjAxG-gYRW0ijev/exec';
+var SERVER_URL = 'https://script.google.com/macros/s/AKfycbxXEUDolMd3xGHWQLdTTi-ML3XKMdq-aNWl8mMNvryZuzqhPMEKYYNcGv2rx6-rfmHHRA/exec';
 
 /* =====================================================================
    1. KATALOG & KONSTANTA
@@ -1061,7 +1073,7 @@ function render(){
   if(has){ renderKPI(); renderAreaProgress(); renderRank(); renderTrend(); renderHadir(); renderHambatan(); }
   renderPlan(); renderLog(); renderWho(); renderTabs();
   renderKaryawan(); renderAbsensi(); renderRekapAbs(); syncAbsToForm();
-  renderAktivitas(); renderPanduan(); renderTakSelesai(); renderServer();
+  renderAktivitas(); renderSiapa(); renderPanduan(); renderTakSelesai(); renderServer();
   if(unlocked()){ renderNilai(); renderBoq(); renderTargetTable(); renderDataInfo(); }
 }
 
@@ -1449,6 +1461,9 @@ function renderWho(){
   const act = areaAktif();
   document.getElementById('chipArea').textContent = act.length ? act.join(' · ') : 'Area belum diisi';
   document.getElementById('btnLock').hidden = !unlocked();
+  var bg = document.getElementById('btnGantiPetugas');
+  if(bg) bg.hidden = !((typeof srvAda === 'function') && srvAda() && (typeof SRV !== 'undefined')
+                       && SRV.peran && !SRV.milikSendiri);
 }
 const TABS = [
   ['ringkasan','Ringkasan','#C1272D',0],
@@ -2075,6 +2090,43 @@ function waktuID(iso){
   return isNaN(d) ? iso : d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})
     + ' ' + d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
 }
+function renderSiapa(){
+  var box = document.getElementById('siapaTable');
+  if(!box) return;
+  var log = (DB.log||[]);
+  var per = {};
+  log.forEach(function(l){
+    var nama = l.who || 'Tanpa nama';
+    var p = per[nama] = per[nama] || {nama:nama, buka:0, simpan:0, awal:l.ts, akhir:l.ts, peran:{}};
+    var isMasuk = /membuka dashboard/i.test(l.detail||'') || /^masuk$/i.test(l.aksi||'');
+    if(isMasuk) p.buka++; else p.simpan++;
+    if(l.ts < p.awal) p.awal = l.ts;
+    if(l.ts > p.akhir) p.akhir = l.ts;
+    if(l.mode) p.peran[l.mode] = 1;
+  });
+  var daftar = Object.keys(per).map(function(k){ return per[k]; })
+    .sort(function(a,b){ return a.akhir < b.akhir ? 1 : -1; });
+  if(!daftar.length){
+    box.innerHTML = '<div class="empty"><h3>Belum ada yang tercatat</h3>'
+      + '<p>Setiap orang yang membuka dashboard dan memasukkan namanya akan muncul di sini, '
+      + 'termasuk yang hanya melihat tanpa menginput apa pun.</p></div>';
+    return;
+  }
+  var h = '<table><thead><tr><th>Nama</th><th>Peran</th><th class="num">Kali membuka</th>'
+        + '<th class="num">Kali menyimpan</th><th>Terakhir aktif</th></tr></thead><tbody>';
+  daftar.forEach(function(p){
+    var peran = Object.keys(p.peran).join(', ') || '—';
+    h += '<tr><td><strong>' + esc(p.nama) + '</strong></td>'
+      + '<td><span class="tag ' + (peran.indexOf('manajemen')>=0 ? 'warn' : 'info') + '">' + esc(peran) + '</span></td>'
+      + '<td class="num">' + p.buka + '</td><td class="num">' + p.simpan + '</td>'
+      + '<td class="mono" style="white-space:nowrap">' + waktuID(p.akhir) + '</td></tr>';
+  });
+  h += '</tbody></table><p class="hint">Nama diisi sendiri oleh pengguna saat masuk, jadi ini catatan '
+     + 'kejujuran &mdash; bukan bukti identitas. Untuk melacak kesalahan input sehari-hari sudah cukup, '
+     + 'tetapi jangan dipakai sebagai dasar tuduhan.</p>';
+  box.innerHTML = h;
+}
+
 function renderAktivitas(){
   const log = (DB.log||[]).slice().reverse();
   const selA = document.getElementById('logAksi'), selP = document.getElementById('logPetugas');
@@ -2245,7 +2297,7 @@ function cekCadangan(){
    Tanpa URL server, dashboard tetap jalan memakai penyimpanan browser.
    Begitu URL diisi dan sandi benar, Sheet menjadi sumber kebenaran.
    ===================================================================== */
-var SRV = {sandi:'', peran:'', sibuk:false, terakhir:''};
+var SRV = {sandi:'', peran:'', namaServer:'', milikSendiri:false, sibuk:false, terakhir:''};
 
 function srvAda(){ return !!(DB.serverUrl && String(DB.serverUrl).indexOf('http') === 0); }
 function srvMasuk_(){ return !!SRV.peran; }
@@ -2307,8 +2359,15 @@ function srvLogin(url, sandi){
   DB.serverUrl = String(url||'').trim();
   SRV.sandi = String(sandi||'').trim();
   SRV.sibuk = true; tandaServer();
-  return srvPost('login', {}).then(function(j){
+  return srvPost('login', {perangkat: (typeof perangkat==='function' ? perangkat() : '')}).then(function(j){
     SRV.peran = j.peran;
+    SRV.namaServer = j.nama || '';        /* terisi hanya bila sandinya milik perorangan */
+    SRV.milikSendiri = !!j.milikSendiri;
+    if(SRV.namaServer){
+      DB.petugas = SRV.namaServer;
+      var el = document.getElementById('petugas');
+      if(el) el.value = SRV.namaServer;
+    }
     save();
     return srvTarik();
   }).then(function(){
@@ -2420,7 +2479,10 @@ function tandaServer(){
   if(chip){
     if(!srvAda())        { chip.textContent = 'Tanpa server'; chip.style.background = 'rgba(255,255,255,.16)'; }
     else if(SRV.sibuk)   { chip.textContent = 'Menyambung…';  chip.style.background = 'rgba(200,150,30,.55)'; }
-    else if(srvMasuk_()) { chip.textContent = 'Server: ' + SRV.peran; chip.style.background = 'rgba(78,122,58,.65)'; }
+    else if(srvMasuk_()) {
+      chip.textContent = (SRV.namaServer ? SRV.namaServer + ' · ' : '') + SRV.peran;
+      chip.style.background = 'rgba(78,122,58,.65)';
+    }
     else                 { chip.textContent = 'Server belum masuk'; chip.style.background = 'rgba(193,39,45,.6)'; }
   }
   var n = (DB.antrian||[]).length;
@@ -2560,13 +2622,41 @@ function sibukGerbang(on, teks){
   if(b){ b.disabled = !!on; b.textContent = on ? (teks || 'Menyambung…') : 'Masuk'; }
 }
 
-function masukDenganSandi(sandi, ingat){
+/* Keterangan singkat perangkat, untuk membedakan pembukaan dari HP dan laptop. */
+function perangkat(){
+  var u = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+  var os = /Android/i.test(u) ? 'Android' : /iPhone|iPad/i.test(u) ? 'iPhone/iPad'
+         : /Windows/i.test(u) ? 'Windows' : /Mac OS/i.test(u) ? 'Mac' : 'perangkat lain';
+  var br = /Edg\//i.test(u) ? 'Edge' : /OPR\//i.test(u) ? 'Opera'
+         : /Chrome/i.test(u) ? 'Chrome' : /Firefox/i.test(u) ? 'Firefox'
+         : /Safari/i.test(u) ? 'Safari' : 'browser lain';
+  return os + ' · ' + br;
+}
+
+function masukDenganSandi(nama, sandi, ingat){
+  nama  = String(nama||'').trim();
   sandi = String(sandi||'').trim();
   if(!sandi){ tampilGerbang('Kata sandi belum diisi.', ''); return; }
+  /* Nama boleh kosong: kalau sandinya milik perorangan, server yang
+     memberitahu namanya. Kalau sandi bersama, nama wajib diketik. */
+  if(nama){
+    DB.petugas = nama;
+    var el = document.getElementById('petugas');
+    if(el) el.value = nama;
+  }
   sibukGerbang(true);
   return srvLogin(DB.serverUrl, sandi).then(function(){
+    if(!SRV.namaServer && !nama){
+      /* sandi bersama tanpa nama: tolak, karena catatannya jadi tak berpemilik */
+      SRV.peran = ''; SRV.sandi = ''; DB.sandiIngat = ''; save();
+      sibukGerbang(false); tandaServer();
+      tampilGerbang('Sandi itu dipakai bersama, jadi <b>nama Anda wajib diisi</b> '
+        + 'supaya ketahuan siapa yang membuka dan menginput.', '');
+      return;
+    }
     DB.sandiIngat = ingat ? sandi : '';
     save();
+    catatMasuk();
     sibukGerbang(false);
     tutupGerbang();
     renderTabs();
@@ -2578,13 +2668,28 @@ function masukDenganSandi(sandi, ingat){
   });
 }
 
+/* Catat pembukaan. Untuk sandi perorangan, server sudah mencatat sendiri
+   saat login — jadi di sini cukup catatan lokal supaya tidak dobel. */
+function catatMasuk(){
+  var rincian = 'Membuka dashboard sebagai ' + SRV.peran + ' — ' + perangkat();
+  catat('sistem', rincian);
+  save();
+  if(SRV.milikSendiri) return;
+  srvPost('catatLog', {kegiatan:'Masuk', rincian:rincian}).catch(function(){
+    srvAntri('catatLog', {kegiatan:'Masuk', rincian:rincian}, 'Catatan masuk');
+  });
+}
+
 /* Dipanggil sekali saat halaman dibuka. */
 function mulaiMasuk(){
   if(!srvAda()){ tutupGerbang(); return; }      /* tanpa server: dashboard terbuka biasa */
+  var n = document.getElementById('gerbangNama');
+  if(n && DB.petugas) n.value = DB.petugas;
   if(DB.sandiIngat){
-    tampilGerbang('Menyambung ke Google Sheet…', 'info');
+    tampilGerbang(DB.petugas ? ('Menyambung sebagai <b>' + esc(DB.petugas) + '</b>…') : 'Menyambung…', 'info');
     sibukGerbang(true);
     srvLogin(DB.serverUrl, DB.sandiIngat).then(function(){
+      catatMasuk();
       sibukGerbang(false); tutupGerbang(); renderTabs();
     }).catch(function(e){
       sibukGerbang(false);
@@ -3034,11 +3139,26 @@ document.getElementById('btnFpCancel').onclick = ()=>{
   document.getElementById('fpName').textContent = 'Belum ada berkas dipilih.';
 };
 document.getElementById('gerbangMasukBtn').onclick = ()=>{
-  masukDenganSandi(document.getElementById('gerbangSandi').value,
+  masukDenganSandi(document.getElementById('gerbangNama').value,
+                   document.getElementById('gerbangSandi').value,
                    document.getElementById('gerbangIngat').checked);
 };
-document.getElementById('gerbangSandi').onkeydown = ev=>{
-  if(ev.key === 'Enter') document.getElementById('gerbangMasukBtn').click();
+['gerbangNama','gerbangSandi'].forEach(id=>{
+  document.getElementById(id).onkeydown = ev=>{
+    if(ev.key === 'Enter') document.getElementById('gerbangMasukBtn').click();
+  };
+});
+document.getElementById('btnGantiPetugas').onclick = ()=>{
+  const n = prompt('Siapa yang memakai dashboard sekarang?', DB.petugas || '');
+  if(n === null) return;
+  const nama = n.trim();
+  if(nama.length < 3){ toast('Nama minimal 3 huruf.'); return; }
+  DB.petugas = nama;
+  document.getElementById('petugas').value = nama;
+  save();
+  if(srvMasuk_()) catatMasuk();
+  render();
+  toast('Petugas sekarang: ' + nama);
 };
 document.getElementById('btnSrvMasuk').onclick = ()=>{
   const u = document.getElementById('srvUrl').value.trim();
