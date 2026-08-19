@@ -449,7 +449,7 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
     <div class="card mb"><div class="stripe" style="background:var(--hijau)"></div>
       <div class="card-h"><h2>Impor dari mesin finger</h2><span class="note">berkas CSV hasil ekspor</span></div>
       <div class="card-b">
-        <div class="banner info">Mesin finger tidak bisa dihubungi langsung oleh halaman web, jadi alurnya lewat berkas. Di software mesin (Fingerspot, Solution, ZKTeco, dan sejenisnya) pilih menu ekspor laporan kehadiran, simpan sebagai <strong>CSV</strong>, lalu unggah di sini. Berkas Excel .xls perlu disimpan ulang sebagai CSV lebih dulu.</div>
+        <div class="banner info">Di software mesin finger (Fingerspot, Solution, ZKTeco, dan sejenisnya) pilih menu ekspor laporan kehadiran, simpan sebagai <strong>CSV</strong>, lalu unggah di sini. Berkas Excel .xls perlu disimpan ulang sebagai CSV lebih dulu.</div>
         <div class="bar-actions mb">
           <input type="file" id="fpFile" accept=".csv,.txt,.tsv,.dat" hidden>
           <button class="btn hijau" id="btnFpPick">Pilih berkas CSV</button>
@@ -512,18 +512,14 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
     <div id="srvAntrian" class="banner" hidden></div>
 
     <div class="card mb"><div class="stripe" style="background:var(--brand)"></div>
-      <div class="card-h"><h2>Sambungan ke Google Sheet</h2><span class="note">Apps Script Web App</span></div>
+      <div class="card-h"><h2>Sambungan pusat data</h2></div>
       <div class="card-b">
-        <div class="banner info">Tempelkan URL hasil <b>Deploy &rarr; New deployment &rarr; Web app</b> dari Apps Script.
-        Alamatnya harus berakhiran <b>/exec</b>, bukan /dev. Kalau ditempel di browser, halaman itu harus membalas
-        tulisan &ldquo;Backend DATABASE INSULATION BMKP aktif&rdquo;.</div>
         <div class="srvbox">
-          <label class="field"><span>URL Web App (/exec)</span>
+          <label class="field"><span>Alamat pusat data</span>
             <input type="url" id="srvUrl" placeholder="https://script.google.com/macros/s/AKfycb...../exec">
-            <span class="hint">Cukup diisi sekali. Tersimpan di perangkat ini.</span></label>
+            <span class="hint">Sudah terisi. Cukup diubah bila alamatnya berganti.</span></label>
           <label class="field"><span>Kata sandi</span>
-            <input type="password" id="srvSandi" placeholder="sandi lapangan atau manajemen" autocomplete="current-password">
-            <span class="hint">Sandi lapangan untuk admin penginput. Sandi manajemen membuka nilai rupiah, data karyawan, serta hak ubah dan hapus.</span></label>
+            <input type="password" id="srvSandi" placeholder="kata sandi" autocomplete="current-password"></label>
         </div>
         <div class="bar-actions">
           <button class="btn primary" id="btnSrvMasuk">Masuk ke server</button>
@@ -534,11 +530,31 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
         </div>
       </div></div>
 
+    <div class="card mb"><div class="stripe" style="background:var(--slate2)"></div>
+      <div class="card-h"><h2>Kelola pengguna</h2><span class="note">tambah, atur ulang sandi, cabut akses</span></div>
+      <div class="card-b">
+        <div class="frow" style="max-width:820px">
+          <label class="field"><span>Nama</span><input type="text" id="pgNama" placeholder="nama lengkap"></label>
+          <label class="field"><span>Kata sandi</span><input type="text" id="pgSandi" placeholder="minimal 6 karakter"></label>
+          <label class="field"><span>Peran</span>
+            <select id="pgPeran"><option value="lapangan">Lapangan — hanya menambah data</option>
+              <option value="manajemen">Manajemen — lihat rupiah, ubah, hapus</option></select></label>
+        </div>
+        <div class="bar-actions">
+          <button class="btn primary" id="btnPgTambah">Tambahkan pengguna</button>
+          <button class="btn" id="btnPgMuat">Muat ulang daftar</button>
+          <span class="hint" id="pgPesan" style="margin:0"></span>
+        </div>
+        <p class="hint" style="max-width:74ch">Kata sandi hanya terlihat sekali di layar ini. Yang tersimpan di server
+        adalah bentuk teracaknya, jadi sandi yang lupa tidak bisa dilihat &mdash; hanya bisa diatur ulang.</p>
+      </div>
+      <div class="card-b tw" style="border-top:1px solid var(--line2)" id="pgTable"></div></div>
+
     <div class="card mb"><div class="stripe" style="background:var(--oranye)"></div>
       <div class="card-h"><h2>Pemindahan data awal</h2><span class="note">sekali saja, sandi manajemen</span></div>
       <div class="card-b">
-        <div class="banner">Tekan tombol ini <b>satu kali</b> setelah server pertama kali tersambung, untuk memindahkan
-        data yang sudah terlanjur tersimpan di browser ke Google Sheet. Jangan diulang di perangkat lain &mdash;
+        <div class="banner">Tekan tombol ini <b>satu kali</b> setelah sambungan pertama, untuk memindahkan
+        data yang masih tersimpan di browser ke pusat data. Jangan diulang di perangkat lain &mdash;
         data yang sama akan tertulis dua kali.</div>
         <div class="bar-actions">
           <button class="btn oranye" id="btnSrvKirimSemua">Kirim semua data ke server</button>
@@ -550,7 +566,7 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
   <!-- ============ FOTO ============ -->
   <section class="panel" id="p-foto" hidden>
     <div class="card mb"><div class="stripe" style="background:var(--cyan)"></div>
-      <div class="card-h"><h2>Unggah foto kegiatan</h2><span class="note">tersimpan di Google Drive</span></div>
+      <div class="card-h"><h2>Unggah foto kegiatan</h2><span class="note">tersimpan di pusat data</span></div>
       <div class="card-b">
         <div class="frow" style="max-width:760px">
           <label class="field"><span>Tanggal kegiatan</span><input type="date" id="fotoTgl"></label>
@@ -564,12 +580,89 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
         </div>
         <p class="hint" style="max-width:70ch">Bisa memilih beberapa foto sekaligus. Ukurannya dikecilkan otomatis
         sampai sisi terpanjang 1280 piksel sebelum dikirim, supaya cepat di jaringan lapangan dan hemat kuota.
-        Foto dikelompokkan per bulan di Drive.</p>
+        Foto dikelompokkan per bulan.</p>
       </div></div>
 
     <div class="card"><div class="stripe" style="background:var(--biru)"></div>
       <div class="card-h"><h2>Galeri foto</h2><span class="note">terbaru di atas</span></div>
       <div class="card-b" id="fotoGaleri"></div></div>
+  </section>
+
+  <!-- ============ BIAYA AKTUAL ============ -->
+  <section class="panel" id="p-biaya" hidden>
+    <div id="gateBiaya"></div>
+    <div id="biayaBody" hidden>
+      <div id="biayaWarn" class="banner" hidden></div>
+      <div class="grid kpis mb" id="kpiBiaya"></div>
+
+      <div class="plabel" style="background:var(--brand)">Rekap biaya harian</div>
+      <div class="card mb"><div class="stripe" style="background:var(--brand)"></div>
+        <div class="card-h"><h2>Biaya aktual per hari</h2><span class="note">upah dihitung otomatis dari absensi</span></div>
+        <div class="card-b tw" id="biayaHarian"></div></div>
+
+      <div class="plabel" style="background:var(--hijau)">Pemakaian material</div>
+      <div class="card mb"><div class="stripe" style="background:var(--hijau)"></div>
+        <div class="card-h"><h2>Catat pemakaian hari ini</h2></div>
+        <div class="card-b">
+          <div class="frow">
+            <label class="field"><span>Tanggal</span><input type="date" id="pkTgl"></label>
+            <label class="field"><span>Area</span><select id="pkArea"></select></label>
+            <label class="field"><span>Komponen</span><select id="pkKomponen"></select></label>
+            <label class="field" id="pkUkuranWrap"><span>Ukuran pipa</span><select id="pkItem"></select></label>
+            <label class="field"><span>Jumlah</span><input type="number" id="pkQty" min="0" step="0.1" placeholder="jumlah"></label>
+            <label class="field"><span>Catatan</span><input type="text" id="pkKet" placeholder="opsional"></label>
+          </div>
+          <button class="btn hijau" id="btnAddPakai">Tambahkan pemakaian</button>
+        </div>
+        <div class="card-b tw" style="border-top:1px solid var(--line2)" id="pakaiTable"></div></div>
+
+      <div class="plabel" style="background:var(--oranye)">Biaya operasional</div>
+      <div class="card mb"><div class="stripe" style="background:var(--oranye)"></div>
+        <div class="card-h"><h2>Catat pengeluaran harian</h2><span class="note">sewa mobil, BBM, konsumsi, dan lain-lain</span></div>
+        <div class="card-b">
+          <div class="frow">
+            <label class="field"><span>Tanggal</span><input type="date" id="opTgl"></label>
+            <label class="field"><span>Area</span><select id="opArea"></select></label>
+            <label class="field"><span>Jenis biaya</span><select id="opJenis"></select></label>
+            <label class="field"><span>Nominal (Rp)</span><input type="number" id="opNominal" min="0" step="10000" placeholder="rupiah"></label>
+            <label class="field"><span>Catatan</span><input type="text" id="opKet" placeholder="opsional"></label>
+          </div>
+          <div class="bar-actions">
+            <button class="btn oranye" id="btnAddOpex">Tambahkan biaya</button>
+            <input type="text" id="opJenisBaru" placeholder="jenis biaya baru" style="width:auto;min-width:180px">
+            <button class="btn sm" id="btnAddJenis">+ Tambah jenis</button>
+          </div>
+        </div>
+        <div class="card-b tw" style="border-top:1px solid var(--line2)" id="opexTable"></div></div>
+
+      <div class="plabel" style="background:var(--slate2)">Tarif &amp; harga satuan</div>
+      <div class="card mb"><div class="stripe" style="background:var(--slate2)"></div>
+        <div class="card-h"><h2>Upah harian per jabatan</h2></div>
+        <div class="card-b tw" id="tarifTable"></div>
+        <div class="card-b tw" style="border-top:1px solid var(--line2)" id="tarifOrang"></div>
+        <div class="card-b" style="border-top:1px solid var(--line2)">
+          <button class="btn primary" id="btnSaveUpah">Simpan tarif upah</button></div></div>
+
+      <div class="card"><div class="stripe" style="background:var(--teal)"></div>
+        <div class="card-h"><h2>Harga material</h2><span class="note">kosongkan yang belum diketahui</span></div>
+        <div class="card-b tw" id="hargaMatTable"></div>
+        <div class="card-b" style="border-top:1px solid var(--line2)">
+          <button class="btn primary" id="btnSaveHargaMat">Simpan harga material</button></div></div>
+    </div>
+  </section>
+
+  <!-- ============ UNTUNG RUGI ============ -->
+  <section class="panel" id="p-margin" hidden>
+    <div id="gateMargin"></div>
+    <div id="marginBody" hidden>
+      <div class="grid kpis mb" id="kpiMargin"></div>
+      <div class="card mb"><div class="stripe" style="background:var(--emas)"></div>
+        <div class="card-h"><h2>Pendapatan BOQ dibanding biaya aktual</h2><span class="note">per area kerja</span></div>
+        <div class="card-b tw" id="marginArea"></div></div>
+      <div class="card"><div class="stripe" style="background:var(--slate2)"></div>
+        <div class="card-h"><h2>Cara membaca angka ini</h2></div>
+        <div class="card-b" id="marginCatatan"></div></div>
+    </div>
   </section>
 
   <section class="panel" id="p-nilai" hidden>
@@ -610,7 +703,7 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
             <label class="field"><span>Ulangi sandi baru</span><input type="password" id="pwNew2"></label>
           </div>
           <button class="btn merah" id="btnChgPw">Ganti kata sandi</button>
-          <p class="hint" style="margin-top:12px;max-width:72ch">Harga satuan disimpan teracak memakai kata sandi ini, jadi angka rupiah tidak bisa dibaca tanpa sandi &mdash; termasuk oleh admin yang menginput harian. Kalau sandi hilang, harga satuan harus dimasukkan ulang, jadi simpan cadangan setelah menggantinya.</p>
+          <p class="hint" style="margin-top:12px;max-width:72ch">Berlaku untuk sandi bawaan berkas ini saja, dipakai ketika bekerja tanpa sambungan pusat data.</p>
         </div></div>
       <div class="card"><div class="stripe" style="background:var(--slate2)"></div>
         <div class="card-h"><h2>Data tersimpan</h2></div>
@@ -638,8 +731,7 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
     <label class="field" style="text-align:left">
       <span>Nama Anda</span>
       <input type="text" id="gerbangNama" placeholder="mis. Fajar" autocomplete="name">
-      <span class="ghint" style="margin:5px 0 0;display:block">Kosongkan bila Anda punya sandi sendiri &mdash;
-        nama akan diambil otomatis dari server.</span>
+      <span class="ghint" style="margin:5px 0 0;display:block">Boleh dikosongkan bila sandi Anda pribadi.</span>
     </label>
     <label class="field" style="text-align:left">
       <span>Kata sandi</span>
@@ -648,9 +740,8 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
     <label class="gingat"><input type="checkbox" id="gerbangIngat" checked>
       <span>Ingat saya di perangkat ini</span></label>
     <button class="btn primary" id="gerbangMasukBtn" style="width:100%;margin-top:6px">Masuk</button>
-    <p class="ghint">Nama Anda tercatat pada setiap pembukaan dan setiap penyimpanan, dan bisa dilihat
-      di menu <b>Log aktivitas</b>. Sandi lapangan untuk admin penginput; sandi manajemen untuk melihat
-      nilai rupiah dan mengubah data.</p>
+    <p class="ghint">Setiap pembukaan dan penyimpanan tercatat atas nama Anda.<br>
+      Sandi diberikan oleh pengelola. Jangan dibagikan kepada siapa pun.</p>
   </div>
 </div>
 
@@ -678,6 +769,12 @@ var SERVER_URL = 'https://script.google.com/macros/s/AKfycbxXEUDolMd3xGHWQLdTTi-
    ===================================================================== */
 const KEY = 'INSUL_BMKP_V2';
 const AREAS = ['MA1','MA2','MA3','MA4'];
+
+/* Tarif upah harian menurut jabatan. Seseorang bisa diberi tarif khusus
+   yang mengalahkan tarif jabatannya (lihat DB.upahOrang). */
+const UPAH_BAWAAN = {'Teknisi':230000, 'Helper':170000};
+/* Jenis biaya operasional harian. Bisa ditambah sendiri lewat dashboard. */
+const OPEX_BAWAAN = ['Sewa mobil','BBM','Konsumsi','Alat & consumable','Perjalanan','Lain-lain'];
 const AC = {MA1:'#0E7C86', MA2:'#3E77C4', MA3:'#7B5EA7', MA4:'#C9822E'};
 const CAUSE = {
   hujan:    {n:'Cuaca / hujan',       s:'Cuaca',    c:'#3E77C4'},
@@ -744,7 +841,9 @@ function blank(){
   const boq = {}; AREAS.forEach(a=> boq[a] = Object.assign({}, DEF_BOQVOL[a]||{}));
   return {ver:3, jamKerja:8, target:Object.assign({}, DEF_TARGET),
           boqVol:boq, plan:[], entries:[], karyawan:[], absensi:[], foto:[], log:[],
-          antrian:[], serverUrl:SERVER_URL||'', lastSync:'', petugas:'', sandiIngat:'', vault:DEF_VAULT};
+          antrian:[], serverUrl:SERVER_URL||'', lastSync:'', petugas:'', sandiIngat:'',
+          upahJabatan:Object.assign({}, UPAH_BAWAAN), upahOrang:{}, hargaMaterial:{},
+          pemakaian:[], opex:[], opexJenis:OPEX_BAWAAN.slice(), vault:DEF_VAULT};
 }
 let DB = blank();
 let RATE = null;          // harga satuan setelah dibuka; null = terkunci
@@ -783,6 +882,12 @@ function load(){
       DB.serverUrl= p.serverUrl || SERVER_URL || '';
       DB.lastSync = p.lastSync || '';
       DB.sandiIngat = p.sandiIngat || '';
+      DB.upahJabatan   = Object.assign({}, UPAH_BAWAAN, p.upahJabatan||{});
+      DB.upahOrang     = p.upahOrang || {};
+      DB.hargaMaterial = p.hargaMaterial || {};
+      DB.pemakaian     = Array.isArray(p.pemakaian) ? p.pemakaian : [];
+      DB.opex          = Array.isArray(p.opex) ? p.opex : [];
+      DB.opexJenis     = (p.opexJenis && p.opexJenis.length) ? p.opexJenis : OPEX_BAWAAN.slice();
       DB.vault   = p.vault || DEF_VAULT;
     }
   }catch(e){
@@ -824,6 +929,16 @@ function toast(msg){
   t.textContent = msg; t.classList.add('on');
   clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('on'), 3200);
 }
+/* Pengikatan aman. Kalau elemennya belum ada di halaman, pengikatan
+   diabaikan diam-diam — satu tombol yang hilang tidak boleh mematikan
+   seluruh dashboard seperti yang pernah terjadi. */
+function El(id){
+  var e = document.getElementById(id);
+  if(e) return e;
+  if(typeof console !== 'undefined' && console.warn) console.warn('Elemen tidak ditemukan:', id);
+  return {};
+}
+
 function areaAktif(){
   return AREAS.filter(a => Object.keys(DB.boqVol[a]||{}).length > 0
                         || DB.entries.some(e=>e.area===a) || DB.plan.some(p=>p.area===a)
@@ -1073,8 +1188,9 @@ function render(){
   if(has){ renderKPI(); renderAreaProgress(); renderRank(); renderTrend(); renderHadir(); renderHambatan(); }
   renderPlan(); renderLog(); renderWho(); renderTabs();
   renderKaryawan(); renderAbsensi(); renderRekapAbs(); syncAbsToForm();
-  renderAktivitas(); renderSiapa(); renderPanduan(); renderTakSelesai(); renderServer();
-  if(unlocked()){ renderNilai(); renderBoq(); renderTargetTable(); renderDataInfo(); }
+  renderAktivitas(); renderSiapa(); renderPanduan(); renderTakSelesai(); renderServer(); renderPengguna();
+  if(unlocked()){ renderNilai(); renderBoq(); renderTargetTable(); renderDataInfo();
+                  renderBiaya(); renderMargin(); }
 }
 
 function renderKPI(){
@@ -1419,18 +1535,9 @@ function gateHTML(id, judul){
   var peran = (typeof SRV !== 'undefined') ? SRV.peran : '';
   var catatan;
   if(srvOn && peran === 'lapangan'){
-    catatan = `<div class="banner" style="text-align:left">Anda sedang masuk sebagai <b>lapangan</b>.
-      Halaman ini hanya untuk pemegang <b>sandi manajemen</b>. Masukkan sandi manajemen di bawah,
-      atau ganti lewat tab <b>Server</b>.</div>`;
-  }else if(srvOn && !peran){
-    catatan = `<div class="banner" style="text-align:left">Server sudah tersambung tetapi Anda belum masuk.
-      Gunakan <b>sandi manajemen</b> yang Anda buat lewat menu <b>BMKP Insulation &rarr; Atur Kata Sandi</b>
-      di Spreadsheet &mdash; bukan sandi bawaan dashboard.</div>`;
-  }else if(srvOn){
-    catatan = '';
+    catatan = `<div class="banner" style="text-align:left">Halaman ini di luar wewenang Anda.</div>`;
   }else{
-    catatan = `<div class="banner info" style="text-align:left">Belum tersambung ke server, jadi yang dipakai
-      adalah sandi bawaan dashboard.</div>`;
+    catatan = '';
   }
   return `<div class="gate card"><div class="card-b">
     <div class="lockbig">&#128274;</div>
@@ -1445,6 +1552,10 @@ function renderGates(){
   document.getElementById('gateNilai').innerHTML = unlocked() ? '' : gateHTML('pw1','Nilai kontrak &amp; opname');
   document.getElementById('gateBoq').innerHTML   = unlocked() ? '' : gateHTML('pw2','Harga satuan &amp; BOQ');
   document.getElementById('gateKaryawan').innerHTML = unlocked() ? '' : gateHTML('pw3','Data karyawan');
+  document.getElementById('gateBiaya').innerHTML  = unlocked() ? '' : gateHTML('pw4','Biaya aktual');
+  document.getElementById('gateMargin').innerHTML = unlocked() ? '' : gateHTML('pw5','Untung rugi');
+  document.getElementById('biayaBody').hidden  = !unlocked();
+  document.getElementById('marginBody').hidden = !unlocked();
   document.getElementById('nilaiBody').hidden    = !unlocked();
   document.getElementById('boqBody').hidden      = !unlocked();
   document.getElementById('karyawanBody').hidden = !unlocked();
@@ -1475,9 +1586,11 @@ const TABS = [
   ['aktivitas','Log aktivitas','#4A4643',0],
   ['foto','Foto kegiatan','#0E7FA0',0],
   ['panduan','Panduan','#B0651A',0],
-  ['server','Server','#5E1417',0],
+  ['server','Server','#5E1417',1],
   ['karyawan','Data karyawan','#6B4A12',1],
-  ['nilai','Nilai &amp; tagihan','#8A6A12',1],
+  ['nilai','Pendapatan BOQ','#8A6A12',1],
+  ['biaya','Biaya aktual','#6B2F14',1],
+  ['margin','Untung rugi','#155E3B',1],
   ['boq','Harga &amp; BOQ','#231F1E',1]
 ];
 function renderTabs(){
@@ -2163,6 +2276,7 @@ function renderAktivitas(){
    19. PANDUAN
    ===================================================================== */
 function renderPanduan(){
+  var pengelola = unlocked();   /* bagian teknis hanya untuk pemegang sandi manajemen */
   document.getElementById('panduanBody').innerHTML = `
 <style>
  .pd h3{font-size:19px;margin:26px 0 8px;color:var(--brand-d);text-transform:uppercase;letter-spacing:.04em}
@@ -2173,47 +2287,54 @@ function renderPanduan(){
  .pd .kotak{background:#FAF6F0;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
 </style>
 <div class="pd">
-<h3>1. Siapa memakai apa</h3>
-<p>Dashboard ini punya dua tingkat. <strong>Mode Lapangan</strong> terbuka tanpa sandi &mdash; dipakai admin untuk menginput progres dan absensi setiap hari. <strong>Mode Manajemen</strong> perlu kata sandi dan hanya untuk Anda serta pimpinan.</p>
-<div class="kotak">
-<p style="margin:0"><strong>Terbuka:</strong> Ringkasan, Rencana &amp; durasi, Analisa hambatan, Input harian, Absensi harian, Rekap &amp; history, Log aktivitas, Panduan.<br>
-<strong>Terkunci:</strong> Data karyawan, Nilai &amp; tagihan, Harga &amp; BOQ. Ditambah semua tombol <em>Ubah</em> dan <em>Hapus</em> &mdash; admin hanya bisa menambah, tidak bisa mengubah atau menghapus catatan yang sudah tersimpan.</p>
-</div>
-<p>Isi kolom <strong>Petugas</strong> di bar atas sekali saja. Nama itu melekat pada setiap penyimpanan dan muncul di Log aktivitas.</p>
+<h3>1. Sebelum mulai</h3>
+<p>Kata sandi Anda diberikan oleh pengelola. <strong>Jangan dibagikan kepada siapa pun</strong>, termasuk sesama rekan kerja &mdash; setiap penyimpanan tercatat atas nama pemilik sandi, jadi kesalahan orang lain bisa tercatat sebagai kesalahan Anda.</p>
+<p>Centang <strong>Ingat saya</strong> saat masuk supaya besok tidak perlu mengetik sandi lagi. Jangan mencentangnya bila memakai perangkat bersama.</p>
 
-<h3>2. Urutan kerja harian</h3>
+<h3>2. Urutan kerja setiap hari</h3>
 <ol>
 <li><strong>Absensi harian</strong> dulu. Pilih tanggal dan area, ketuk status tiap orang (H hadir, I izin, S sakit, A alpa, C cuti, L libur), lalu Simpan.</li>
 <li><strong>Input harian</strong> berikutnya. Pilih tanggal dan area yang sama &mdash; jumlah pekerja rencana dan hadir <em>terisi sendiri</em> dari absensi tadi.</li>
 <li>Isi <strong>Rencana (m)</strong> untuk pekerjaan yang direncanakan hari itu, lalu <strong>Terpasang (m)</strong> untuk hasil nyatanya.</li>
 <li>Isi jam hujan, jam tunggu material, dan catatan bila ada baris yang tidak selesai.</li>
-<li>Simpan. Ringkasan dan Analisa hambatan langsung ikut berubah.</li>
+<li>Periksa kotak ringkasan, lalu Simpan.</li>
 </ol>
+<p>Ulangi untuk area berikutnya. Sekitar tiga menit per area.</p>
 
 <h3>3. Sisa pekerjaan berpindah sendiri</h3>
 <p>Kalau rencana 40 m tapi terpasang 25 m, sisa 15 m otomatis muncul sebagai <strong>bawaan</strong> saat Anda membuka tanggal berikutnya untuk area yang sama &mdash; baris berwarna krem, sudah terisi. Anda tinggal menambah rencana baru di bawahnya.</p>
-<p>Sisa dihitung sebagai selisih kumulatif seluruh tanggal sebelumnya, bukan disalin per hari, jadi tidak ada penjumlahan ganda meski tertunda berhari-hari. Semua baris yang tidak selesai beserta alasannya terkumpul di <strong>Rekap &amp; history</strong>.</p>
+<p>Anda tidak perlu mencatat sisa di buku atau menghitung manual. Semua baris yang tidak selesai beserta alasannya terkumpul di <strong>Rekap &amp; history</strong>.</p>
 
 <h3>4. Membaca capaian</h3>
-<p>Ada dua ukuran yang berbeda dan keduanya penting:</p>
 <ul>
-<li><strong>Capaian target</strong> memakai satuan hari-standar. Volume dibagi target normatif ukuran itu &mdash; 14 m pipa 8" bernilai 1,00 karena targetnya 14 m per hari. Angka 1,00 berarti tim bekerja tepat sesuai target perusahaan.</li>
-<li><strong>Capaian rencana</strong> membandingkan terpasang dengan rencana yang admin buat sendiri hari itu. Ini menunjukkan seberapa realistis perencanaannya.</li>
+<li><strong>Capaian target</strong> memakai satuan hari-standar. Volume dibagi target normatif ukuran itu &mdash; 14 m pipa 8" bernilai 1,00 karena targetnya 14 m per hari. Angka 1,00 berarti tepat target.</li>
+<li><strong>Capaian rencana</strong> membandingkan terpasang dengan rencana yang dibuat sendiri hari itu.</li>
 </ul>
 <p>Kalau capaian rencana tinggi tapi capaian target rendah, berarti rencananya yang terlalu longgar &mdash; bukan timnya yang lambat.</p>
 
 <h3>5. Analisa hambatan</h3>
-<p>Jam kerja dibagi empat: efektif, hilang karena cuaca, hilang karena tunggu material, dan hilang karena pekerja tidak masuk. Yang kelima, <strong>sebab lain di lapangan</strong>, adalah sisa yang tidak terjelaskan oleh empat hal itu &mdash; biasanya scaffolding, izin kerja, atau permukaan pipa belum siap. Kalau angka ini yang paling besar, jangan mengejar tiga sebab utama.</p>
-<p>Angka kerugian di sini adalah estimasi untuk kendali internal. Untuk klaim resmi ke owner, tetap perlu logbook cuaca, surat permintaan material, dan daftar hadir bertanda tangan.</p>
+<p>Jam kerja dibagi lima: efektif, hilang karena cuaca, karena menunggu material, karena pekerja tidak masuk, dan <strong>sebab lain di lapangan</strong> &mdash; sisa yang tidak terjelaskan oleh empat hal sebelumnya, biasanya scaffolding, izin kerja, atau permukaan pipa belum siap.</p>
+<div class="kotak">
+<p style="margin:0"><strong>Isi jam hujan dan jam tunggu material apa adanya.</strong> Kalau diisi asal, kerugian akan lari ke kolom &ldquo;sebab lain&rdquo; yang terbaca sebagai <em>tim bekerja lambat</em>. Pencatatan yang jujur justru melindungi tim Anda.</p>
+</div>
 
-<h3>6. Mesin finger</h3>
-<p>Halaman web tidak bisa menghubungi mesin secara langsung. Alurnya: buka software mesin &rarr; ekspor laporan kehadiran &rarr; simpan sebagai <strong>CSV</strong> &rarr; unggah di menu Data karyawan. Berkas .xls perlu di-<em>Save As</em> jadi CSV dulu.</p>
-<p><strong>Syarat mutlak:</strong> kolom NIK/PIN di data karyawan harus persis sama dengan PIN di mesin. Itu satu-satunya kunci pencocokan.</p>
+<h3>6. Mengimpor data mesin finger</h3>
+<p>Di software mesin finger, ekspor laporan kehadiran dan simpan sebagai <strong>CSV</strong>, lalu unggah di menu Data karyawan. Berkas .xls perlu disimpan ulang sebagai CSV dulu.</p>
+<p><strong>Syarat:</strong> kolom NIK/PIN di data karyawan harus persis sama dengan PIN di mesin. Itu satu-satunya kunci pencocokan.</p>
 
-<h3>7. Menjaga data</h3>
-<p>Data tersimpan di browser perangkat ini saja. Unduh cadangan dari menu Harga &amp; BOQ secara berkala dan simpan di Google Drive. Tanpa itu, membersihkan cache atau berganti laptop berarti data hilang.</p>
-<p>Kata sandi tidak bisa dipulihkan. Kalau lupa, harga satuan harus dimasukkan ulang seluruhnya.</p>
-</div>`;
+<h3>7. Kalau ada yang salah</h3>
+<p>Catatan yang sudah tersimpan <strong>tidak bisa Anda ubah atau hapus sendiri</strong>. Ini disengaja supaya angka laporan tidak berubah tanpa jejak. Kalau ada salah ketik, jangan menyimpan ulang &mdash; laporkan ke pengelola dengan menyebutkan tanggal, area, dan angka yang benar.</p>
+<p>Menu bertanda gembok berada di luar wewenang Anda dan tidak perlu dibuka untuk pekerjaan harian.</p>
+` + (pengelola ? `
+<h3>8. Catatan untuk pengelola</h3>
+<p>Bagian ini hanya tampil bagi pemegang sandi manajemen.</p>
+<ul>
+<li>Pengguna dan kata sandi diatur dari lembar pusat data, lewat menu khusus di sana. Menambah, mengganti sandi, atau menonaktifkan orang berlaku seketika tanpa perlu tindakan lain.</li>
+<li>Setiap pembukaan dan penyimpanan tercatat di <strong>Log aktivitas</strong>, lengkap dengan nama dan perangkatnya.</li>
+<li>Unduh cadangan secara berkala dari menu <strong>Harga &amp; BOQ</strong> dan simpan terpisah.</li>
+<li>Kata sandi tidak bisa dipulihkan, hanya bisa diganti.</li>
+</ul>
+` : '') + `</div>`;
 }
 
 /* =====================================================================
@@ -2272,10 +2393,8 @@ function cekCadangan(){
     if(w0){
       w0.hidden = false;
       w0.className = 'banner';
-      w0.innerHTML = '<b>Belum masuk ke server.</b> Apa pun yang Anda input sekarang '
-        + 'hanya tersimpan di browser dan <b>tidak sampai ke Google Sheet</b>. '
-        + 'Buka tab <b>Server</b>, masukkan kata sandi, dan pastikan chip di header '
-        + 'berubah menjadi hijau sebelum mulai menginput.';
+      w0.innerHTML = '<b>Belum masuk.</b> Apa pun yang Anda input sekarang hanya tersimpan '
+        + 'di perangkat ini dan <b>tidak terkirim ke pusat data</b>. Muat ulang halaman lalu masuk kembali.';
     }
     return;
   }
@@ -2288,8 +2407,8 @@ function cekCadangan(){
   w.hidden = false;
   w.className = 'banner';
   w.innerHTML = last
-    ? `Cadangan terakhir ${Math.floor(hari)} hari lalu. Data dashboard ini hanya tersimpan di browser perangkat ini — unduh cadangan lewat menu Harga &amp; BOQ dan simpan di Google Drive.`
-    : `Data dashboard ini hanya tersimpan di browser perangkat ini. Belum pernah ada cadangan diunduh. Buka menu Harga &amp; BOQ dan unduh cadangan, lalu simpan di Google Drive.`;
+    ? `Cadangan terakhir ${Math.floor(hari)} hari lalu. Data hanya tersimpan di perangkat ini — unduh cadangan lewat menu Harga &amp; BOQ.`
+    : `Data hanya tersimpan di perangkat ini dan belum pernah dicadangkan. Buka menu Harga &amp; BOQ untuk mengunduh cadangan.`;
 }
 
 /* =====================================================================
@@ -2312,7 +2431,7 @@ function srvPost(aksi, extra){
   }).then(function(r){ return r.text(); }).then(function(t){
     var j;
     try{ j = JSON.parse(t); }
-    catch(e){ throw new Error('Balasan server tidak terbaca. Pastikan URL berakhiran /exec dan sudah di-Deploy sebagai Web app.'); }
+    catch(e){ throw new Error('Pusat data tidak menjawab dengan benar. Hubungi pengelola.'); }
     if(!j.ok) throw new Error(j.pesan || 'Server menolak permintaan.');
     return j;
   });
@@ -2388,7 +2507,7 @@ function srvTarik(){
   return srvPost('tarik', {}).then(function(j){
     var kosongDiServer = !(j.entries||[]).length && !(j.karyawan||[]).length && !(j.absensi||[]).length;
     if(kosongDiServer && (lokalSebelum.e + lokalSebelum.k + lokalSebelum.a) > 0){
-      toast('Server masih kosong. Data browser tidak ditimpa — tekan "Kirim semua data ke server" dulu.');
+      toast('Pusat data masih kosong. Data browser tidak ditimpa.');
       SRV.terakhir = new Date().toISOString();
       tandaServer();
       return j;   /* jangan timpa data lokal dengan yang kosong */
@@ -2406,6 +2525,10 @@ function srvTarik(){
     if(k.jamKerja) DB.jamKerja = +k.jamKerja || 8;
     if(k.target){ try{ DB.target = Object.assign({}, DEF_TARGET, JSON.parse(k.target)); }catch(e){} }
     if(k.boqVol){ try{ DB.boqVol = Object.assign(blank().boqVol, JSON.parse(k.boqVol)); }catch(e){} }
+    [['upahJabatan','upahJabatan'],['upahOrang','upahOrang'],['hargaMaterial','hargaMaterial'],
+     ['pemakaian','pemakaian'],['opex','opex'],['opexJenis','opexJenis']].forEach(function(pair){
+      if(k[pair[0]]){ try{ DB[pair[1]] = JSON.parse(k[pair[0]]); }catch(e){} }
+    });
     if(k.vault){
       try{ RATE = JSON.parse(k.vault); }catch(e){ RATE = null; }
     }else if(SRV.peran === 'manajemen'){
@@ -2496,11 +2619,11 @@ function tandaServer(){
   if(s){
     s.className = 'banner ' + (srvMasuk_() ? 'ok' : srvAda() ? '' : 'info');
     s.innerHTML = !srvAda()
-      ? 'Belum tersambung ke server. Semua data hanya tersimpan di browser perangkat ini.'
+      ? 'Belum tersambung ke pusat data. Semua data hanya tersimpan di browser perangkat ini.'
       : srvMasuk_()
         ? ('Tersambung sebagai <b>' + SRV.peran + '</b>. Penarikan terakhir ' +
            (DB.lastSync ? waktuID(DB.lastSync) : '—') + '.')
-        : 'URL server tersimpan, tetapi belum masuk. Masukkan kata sandi lalu tekan Masuk ke server.';
+        : 'Alamat pusat data tersimpan, tetapi belum masuk.';
   }
 }
 
@@ -2569,8 +2692,8 @@ function renderFoto(){
   var list = (DB.foto||[]).slice().sort(function(a,b){ return a.tgl<b.tgl?1:-1; });
   if(!list.length){
     box.innerHTML = '<div class="empty"><h3>Belum ada foto</h3>' +
-      '<p>Foto kegiatan tersimpan di Google Drive lewat server, bukan di browser. ' +
-      'Sambungkan server lebih dulu, lalu unggah dari HP di lokasi kerja.</p></div>';
+      '<p>Foto kegiatan tersimpan di pusat data, bukan di browser. ' +
+      'Unggah dari HP langsung di lokasi kerja.</p></div>';
     return;
   }
   var perBulan = {};
@@ -2587,6 +2710,59 @@ function renderFoto(){
             + '</figcaption></figure>';
         }).join('') + '</div>';
   }).join('');
+}
+
+
+/* =====================================================================
+   26. KELOLA PENGGUNA DARI DASHBOARD (khusus manajemen)
+   ===================================================================== */
+var PENGGUNA = [];
+
+function muatPengguna(diam){
+  if(!srvMasuk_() || SRV.peran !== 'manajemen'){ renderPengguna(); return Promise.resolve(); }
+  return srvPost('penggunaList', {}).then(function(j){
+    PENGGUNA = j.pengguna || [];
+    renderPengguna();
+  }).catch(function(e){
+    if(!diam) toast(e.message);
+    renderPengguna();
+  });
+}
+
+function renderPengguna(){
+  var box = document.getElementById('pgTable');
+  if(!box) return;
+  if(!srvMasuk_() || SRV.peran !== 'manajemen'){
+    box.innerHTML = '<p class="hint">Masuk sebagai manajemen untuk mengelola pengguna.</p>';
+    return;
+  }
+  if(!PENGGUNA.length){
+    box.innerHTML = '<div class="empty"><h3>Belum ada pengguna terdaftar</h3>'
+      + '<p>Tambahkan admin lapangan di atas. Setiap orang sebaiknya punya sandi sendiri '
+      + 'supaya catatan siapa-mengerjakan-apa jelas.</p></div>';
+    return;
+  }
+  var h = '<table><thead><tr><th>Nama</th><th>Peran</th><th>Status</th>'
+        + '<th>Terakhir masuk</th><th class="no-print">Tindakan</th></tr></thead><tbody>';
+  PENGGUNA.forEach(function(u){
+    h += '<tr><td><strong>' + esc(u.nama) + '</strong></td>'
+      + '<td><span class="tag ' + (u.peran==='manajemen'?'warn':'info') + '">' + esc(u.peran) + '</span></td>'
+      + '<td>' + (u.aktif ? '<span class="tag ok">aktif</span>' : '<span class="tag bad">nonaktif</span>') + '</td>'
+      + '<td class="mono" style="white-space:nowrap">' + (u.terakhir || '<span style="color:var(--mute)">belum pernah</span>') + '</td>'
+      + '<td class="no-print" style="white-space:nowrap">'
+      + '<button class="btn sm" data-pgreset="' + esc(u.nama) + '">Atur ulang sandi</button> '
+      + '<button class="btn sm ' + (u.aktif?'merah':'') + '" data-pgaktif="' + esc(u.nama) + '" '
+      + 'data-nilai="' + (u.aktif?'0':'1') + '">' + (u.aktif?'Cabut akses':'Aktifkan') + '</button>'
+      + '</td></tr>';
+  });
+  box.innerHTML = h + '</tbody></table>'
+    + '<p class="hint">Mencabut akses tidak menghapus riwayat pekerjaannya &mdash; '
+    + 'nama itu tetap terbaca di Log aktivitas dan di catatan yang pernah dia simpan.</p>';
+}
+
+function pgPesan(teks, baik){
+  var el = document.getElementById('pgPesan');
+  if(el){ el.innerHTML = teks ? ('<span class="tag ' + (baik?'ok':'bad') + '">' + esc(teks) + '</span>') : ''; }
 }
 
 /* =====================================================================
@@ -2650,8 +2826,7 @@ function masukDenganSandi(nama, sandi, ingat){
       /* sandi bersama tanpa nama: tolak, karena catatannya jadi tak berpemilik */
       SRV.peran = ''; SRV.sandi = ''; DB.sandiIngat = ''; save();
       sibukGerbang(false); tandaServer();
-      tampilGerbang('Sandi itu dipakai bersama, jadi <b>nama Anda wajib diisi</b> '
-        + 'supaya ketahuan siapa yang membuka dan menginput.', '');
+      tampilGerbang('<b>Nama Anda wajib diisi</b> untuk sandi ini.', '');
       return;
     }
     DB.sandiIngat = ingat ? sandi : '';
@@ -2660,11 +2835,12 @@ function masukDenganSandi(nama, sandi, ingat){
     sibukGerbang(false);
     tutupGerbang();
     renderTabs();
+    cekCadangan();                 /* peringatan "belum masuk" dicabut */
+    if(SRV.peran === 'manajemen') muatPengguna(true);
   }).catch(function(e){
     sibukGerbang(false);
     DB.sandiIngat = ''; save();
-    tampilGerbang('<b>' + esc(e.message) + '</b><br>Pakai sandi yang Anda buat lewat menu '
-      + '<b>BMKP Insulation &rarr; Atur Kata Sandi</b> di Spreadsheet.', '');
+    tampilGerbang('<b>' + esc(e.message) + '</b><br>Hubungi pengelola bila sandi Anda tidak berlaku.', '');
   });
 }
 
@@ -2691,10 +2867,12 @@ function mulaiMasuk(){
     srvLogin(DB.serverUrl, DB.sandiIngat).then(function(){
       catatMasuk();
       sibukGerbang(false); tutupGerbang(); renderTabs();
+      cekCadangan();
+      if(SRV.peran === 'manajemen') muatPengguna(true);
     }).catch(function(e){
       sibukGerbang(false);
       DB.sandiIngat = ''; save();
-      tampilGerbang('Sandi yang tersimpan tidak berlaku lagi. Masukkan ulang.', '');
+      tampilGerbang('Sesi Anda sudah berakhir. Masuk kembali.', '');
     });
     return;
   }
@@ -2706,6 +2884,331 @@ function tabTerlihat(p, terkunci){
   if(!terkunci) return true;
   if(!srvAda()) return true;         /* mode tanpa server: seperti semula, pakai gerbang per menu */
   return unlocked();                 /* mode server: hanya peran manajemen yang melihatnya */
+}
+
+/* =====================================================================
+   24. BIAYA AKTUAL
+   Tiga sumber biaya:
+     a. Upah  — dihitung SENDIRI dari absensi harian x tarif per orang.
+     b. Material — dicatat pemakaiannya per hari x harga satuan.
+     c. Operasional — sewa mobil, BBM, dan pengeluaran harian lain.
+   Semua harga dibiarkan kosong sampai diisi; yang kosong tidak dihitung
+   dan ditandai supaya ketahuan bagian mana yang belum lengkap.
+   ===================================================================== */
+
+/* Komponen material. Calcium Silicate memakai harga per ukuran pipa,
+   karena pemakaiannya berbeda jauh antara pipa 1/2" dan 16". */
+const MATERIAL = [
+  {id:'CALSIL', n:'Calcium Silicate', sat:'m', perUkuran:true},
+  {id:'ALCOV',  n:'Aluminium Cover',  sat:'m', perUkuran:true},
+  {id:'BAND',   n:'Banding',          sat:'roll'},
+  {id:'SCREW',  n:'Screw',            sat:'pcs'},
+  {id:'GASPER', n:'Gasper',           sat:'pcs'},
+  {id:'KAWAT',  n:'Kawat',            sat:'kg'},
+  {id:'SILIKON',n:'Silicon',          sat:'tube'}
+];
+const MAT = {}; MATERIAL.forEach(m=>MAT[m.id]=m);
+
+/* ---------- tarif per orang ---------- */
+function tarifOrang(k){
+  if(!k) return 0;
+  const khusus = (DB.upahOrang||{})[k.id];
+  if(khusus != null && khusus !== '') return +khusus || 0;
+  const jab = String(k.jabatan||'').trim();
+  const tabel = DB.upahJabatan || {};
+  if(tabel[jab] != null) return +tabel[jab] || 0;
+  // cocokkan longgar: "Insulator Senior" ikut tarif "Teknisi" bila ada kata kuncinya
+  const kunci = Object.keys(tabel).find(x=> jab.toLowerCase().indexOf(x.toLowerCase()) >= 0);
+  return kunci ? (+tabel[kunci]||0) : 0;
+}
+/* ---------- upah satu hari satu area ---------- */
+function upahHari(tgl, area){
+  const m = absMap(tgl);
+  let total = 0, orang = 0, tanpaTarif = [];
+  karyawanArea(area).forEach(k=>{
+    const a = m[k.id];
+    if(!a || a.status !== 'H') return;
+    orang++;
+    const t = tarifOrang(k);
+    if(t > 0) total += t; else tanpaTarif.push(k.nama);
+  });
+  return {total, orang, tanpaTarif};
+}
+/* ---------- material ---------- */
+function hargaMaterial(komponen, itemId){
+  const h = DB.hargaMaterial || {};
+  if(MAT[komponen] && MAT[komponen].perUkuran) return +((h[komponen]||{})[itemId] || 0);
+  return +(h[komponen] || 0);
+}
+function nilaiPemakaian(p){ return (+p.qty||0) * hargaMaterial(p.komponen, p.itemId); }
+
+function biayaHari(tgl, area){
+  const u = upahHari(tgl, area);
+  const mat = (DB.pemakaian||[]).filter(p=>p.tgl===tgl && p.area===area);
+  const matNilai = mat.reduce((s,p)=>s+nilaiPemakaian(p), 0);
+  const matBelum = mat.filter(p=>hargaMaterial(p.komponen,p.itemId) <= 0).length;
+  const op = (DB.opex||[]).filter(o=>o.tgl===tgl && o.area===area);
+  const opNilai = op.reduce((s,o)=>s+(+o.nominal||0), 0);
+  return {upah:u.total, orang:u.orang, tanpaTarif:u.tanpaTarif,
+          material:matNilai, materialBaris:mat.length, materialBelum:matBelum,
+          opex:opNilai, opexBaris:op.length,
+          total: u.total + matNilai + opNilai};
+}
+/* ---------- rekap seluruh periode ---------- */
+function biayaRekap(area){
+  const tgl = [...new Set(
+    (DB.absensi||[]).map(a=>a.tgl)
+      .concat((DB.pemakaian||[]).map(p=>p.tgl))
+      .concat((DB.opex||[]).map(o=>o.tgl))
+      .concat((DB.entries||[]).map(e=>e.tgl))
+  )].filter(Boolean).sort();
+  const daftar = [];
+  let t = {upah:0, material:0, opex:0, total:0, volume:0, nilai:0};
+  tgl.forEach(d=>{
+    (area ? [area] : areaAktif()).forEach(a=>{
+      const b = biayaHari(d, a);
+      const es = (DB.entries||[]).filter(e=>e.tgl===d && e.area===a);
+      const vol = es.reduce((s,e)=>s+entryVolume(e), 0);
+      const nil = es.reduce((s,e)=>s+entryNilai(e), 0);
+      if(b.total <= 0 && vol <= 0) return;
+      daftar.push({tgl:d, area:a, ...b, volume:vol, nilai:nil});
+      t.upah += b.upah; t.material += b.material; t.opex += b.opex; t.total += b.total;
+      t.volume += vol; t.nilai += nil;
+    });
+  });
+  t.margin = t.nilai - t.total;
+  t.rasio = t.nilai > 0 ? t.total / t.nilai : 0;
+  t.biayaPerMeter = t.volume > 0 ? t.total / t.volume : 0;
+  t.nilaiPerMeter = t.volume > 0 ? t.nilai / t.volume : 0;
+  return {daftar: daftar.sort((a,b)=> a.tgl<b.tgl?1:-1), total:t};
+}
+/* ---------- kelengkapan data ---------- */
+function biayaBelumLengkap(){
+  const kurang = [];
+  const adaUpah = Object.keys(DB.upahJabatan||{}).some(k=>+DB.upahJabatan[k] > 0);
+  if(!adaUpah) kurang.push('tarif upah harian');
+  const tanpa = (DB.karyawan||[]).filter(k=>tarifOrang(k) <= 0);
+  if(tanpa.length) kurang.push(tanpa.length + ' karyawan belum punya tarif');
+  const hm = DB.hargaMaterial || {};
+  const adaMat = MATERIAL.some(m=> m.perUkuran
+    ? Object.keys(hm[m.id]||{}).some(k=>+hm[m.id][k] > 0)
+    : +hm[m.id] > 0);
+  if(!adaMat) kurang.push('harga material');
+  return kurang;
+}
+
+/* =====================================================================
+   25. TAMPILAN BIAYA & UNTUNG RUGI
+   ===================================================================== */
+function renderTarif(){
+  const jab = Object.assign({}, UPAH_BAWAAN, DB.upahJabatan||{});
+  let h = `<table><thead><tr><th>Jabatan</th><th style="width:200px">Upah per hari (Rp)</th>
+    <th class="num">Jumlah orang</th></tr></thead><tbody>`;
+  Object.keys(jab).forEach(j=>{
+    const n = (DB.karyawan||[]).filter(k=>String(k.jabatan||'').toLowerCase().indexOf(j.toLowerCase())>=0).length;
+    h += `<tr><td><strong>${esc(j)}</strong></td>
+      <td><input type="number" min="0" step="5000" data-uj="${esc(j)}" value="${jab[j]||''}" placeholder="belum diisi"></td>
+      <td class="num">${n||'&ndash;'}</td></tr>`;
+  });
+  h += `</tbody></table>
+    <div class="bar-actions" style="margin-top:12px">
+      <input type="text" id="jabBaru" placeholder="nama jabatan baru" style="width:auto;min-width:180px">
+      <button class="btn sm" id="btnTambahJab">+ Tambah jabatan</button>
+    </div>`;
+  document.getElementById('tarifTable').innerHTML = h;
+
+  let o = `<table><thead><tr><th>Nama</th><th>Jabatan</th><th>Area</th>
+    <th class="num">Tarif jabatan</th><th style="width:190px">Tarif khusus orang ini (Rp)</th></tr></thead><tbody>`;
+  if(!(DB.karyawan||[]).length){
+    o = '<div class="empty"><h3>Belum ada karyawan</h3><p>Daftarkan karyawan lebih dulu di menu Data karyawan.</p></div>';
+    document.getElementById('tarifOrang').innerHTML = o;
+  }else{
+    (DB.karyawan||[]).forEach(k=>{
+      const dasar = (function(){ const t=Object.assign({},UPAH_BAWAAN,DB.upahJabatan||{});
+        const kunci=Object.keys(t).find(x=>String(k.jabatan||'').toLowerCase().indexOf(x.toLowerCase())>=0);
+        return kunci ? +t[kunci]||0 : 0; })();
+      const khusus = (DB.upahOrang||{})[k.id];
+      o += `<tr><td><strong>${esc(k.nama)}</strong></td><td>${esc(k.jabatan||'')}</td>
+        <td><span class="dot" style="background:${AC[k.area]}"></span>${k.area}</td>
+        <td class="num">${dasar? rp(dasar) : '<span class="tag warn">belum</span>'}</td>
+        <td><input type="number" min="0" step="5000" data-uo="${k.id}" value="${khusus||''}" placeholder="ikut tarif jabatan"></td></tr>`;
+    });
+    document.getElementById('tarifOrang').innerHTML = o + '</tbody></table>'
+      + '<p class="hint">Kosongkan kolom kanan bila orang itu mengikuti tarif jabatannya. '
+      + 'Isi hanya untuk yang tarifnya berbeda sendiri.</p>';
+  }
+}
+
+function renderHargaMaterial(){
+  const hm = DB.hargaMaterial || {};
+  let h = '';
+  MATERIAL.forEach(m=>{
+    if(m.perUkuran){
+      h += `<tr class="grp"><td colspan="3">${esc(m.n)} — per ${esc(m.sat)}, berbeda tiap ukuran pipa</td></tr>`;
+      ITEMS.filter(i=>i.g==='Pipa').forEach(i=>{
+        const v = ((hm[m.id]||{})[i.id]) || '';
+        h += `<tr><td style="padding-left:22px">${esc(i.n)}</td><td>${esc(m.sat)}</td>
+          <td><input type="number" min="0" step="1000" data-hm="${m.id}" data-hmi="${i.id}" value="${v}" placeholder="belum diisi"></td></tr>`;
+      });
+    }else{
+      h += `<tr><td><strong>${esc(m.n)}</strong></td><td>${esc(m.sat)}</td>
+        <td><input type="number" min="0" step="1000" data-hm="${m.id}" value="${hm[m.id]||''}" placeholder="belum diisi"></td></tr>`;
+    }
+  });
+  document.getElementById('hargaMatTable').innerHTML =
+    `<table><thead><tr><th>Komponen</th><th>Satuan</th><th style="width:200px">Harga satuan (Rp)</th></tr></thead><tbody>`
+    + h + '</tbody></table>';
+}
+
+function opsiKomponen(sel){
+  return MATERIAL.map(m=>`<option value="${m.id}" ${sel===m.id?'selected':''}>${esc(m.n)} (${esc(m.sat)})</option>`).join('');
+}
+function renderPemakaian(){
+  const list = (DB.pemakaian||[]).slice().sort((a,b)=> a.tgl<b.tgl?1:-1);
+  if(!list.length){
+    document.getElementById('pakaiTable').innerHTML =
+      '<div class="empty"><h3>Belum ada pemakaian tercatat</h3>'
+      + '<p>Catat material yang benar-benar terpakai tiap hari. Tanpa ini, biaya aktual hanya berisi upah dan operasional.</p></div>';
+    return;
+  }
+  let h = `<table><thead><tr><th>Tanggal</th><th>Area</th><th>Komponen</th><th>Ukuran</th>
+    <th class="num">Jumlah</th><th class="num">Harga satuan</th><th class="num">Nilai</th>
+    <th>Catatan</th><th class="no-print"></th></tr></thead><tbody>`;
+  let tot = 0;
+  list.slice(0,200).forEach(p=>{
+    const m = MAT[p.komponen] || {n:p.komponen, sat:''};
+    const hs = hargaMaterial(p.komponen, p.itemId);
+    const nl = nilaiPemakaian(p); tot += nl;
+    h += `<tr><td style="white-space:nowrap">${tglID(p.tgl)}</td>
+      <td><span class="dot" style="background:${AC[p.area]}"></span>${p.area}</td>
+      <td>${esc(m.n)}</td><td>${p.itemId ? esc((ITEM[p.itemId]||{n:''}).n) : '&ndash;'}</td>
+      <td class="num">${nf2.format(p.qty)} ${esc(m.sat)}</td>
+      <td class="num">${hs? rp(hs) : '<span class="tag warn">belum diisi</span>'}</td>
+      <td class="num">${nl? rp(nl) : '&ndash;'}</td>
+      <td style="color:var(--slate);font-size:12px">${esc(p.ket||'')}</td>
+      <td class="no-print">${unlocked()? `<button class="btn sm merah" data-delpakai="${p.id}">Hapus</button>`:''}</td></tr>`;
+  });
+  h += `</tbody><tfoot><tr><td colspan="6">Total pemakaian material</td>
+    <td class="num">${rp(tot)}</td><td colspan="2"></td></tr></tfoot></table>`;
+  document.getElementById('pakaiTable').innerHTML = h;
+}
+function renderOpex(){
+  const list = (DB.opex||[]).slice().sort((a,b)=> a.tgl<b.tgl?1:-1);
+  const jenis = (DB.opexJenis && DB.opexJenis.length) ? DB.opexJenis : OPEX_BAWAAN;
+  const sel = document.getElementById('opJenis');
+  if(sel && !sel.options.length) sel.innerHTML = jenis.map(j=>`<option>${esc(j)}</option>`).join('');
+  if(!list.length){
+    document.getElementById('opexTable').innerHTML =
+      '<div class="empty"><h3>Belum ada biaya operasional</h3>'
+      + '<p>Catat sewa mobil, BBM, konsumsi, dan pengeluaran harian lain di sini.</p></div>';
+    return;
+  }
+  let h = `<table><thead><tr><th>Tanggal</th><th>Area</th><th>Jenis biaya</th>
+    <th class="num">Nominal</th><th>Catatan</th><th class="no-print"></th></tr></thead><tbody>`;
+  let tot = 0;
+  list.slice(0,200).forEach(o=>{
+    tot += (+o.nominal||0);
+    h += `<tr><td style="white-space:nowrap">${tglID(o.tgl)}</td>
+      <td><span class="dot" style="background:${AC[o.area]}"></span>${o.area}</td>
+      <td>${esc(o.jenis)}</td><td class="num">${rp(o.nominal)}</td>
+      <td style="color:var(--slate);font-size:12px">${esc(o.ket||'')}</td>
+      <td class="no-print">${unlocked()? `<button class="btn sm merah" data-delopex="${o.id}">Hapus</button>`:''}</td></tr>`;
+  });
+  document.getElementById('opexTable').innerHTML = h
+    + `</tbody><tfoot><tr><td colspan="3">Total operasional</td><td class="num">${rp(tot)}</td>
+       <td colspan="2"></td></tr></tfoot></table>`;
+}
+
+function renderBiaya(){
+  if(!unlocked()) return;
+  renderTarif(); renderHargaMaterial(); renderPemakaian(); renderOpex();
+  const R = biayaRekap();
+  const t = R.total;
+  document.getElementById('kpiBiaya').innerHTML = kpiHTML([
+    {k:'',   lab:'Total biaya aktual', val:rpS(t.total),
+     foot:`upah ${rpS(t.upah)} · material ${rpS(t.material)} · operasional ${rpS(t.opex)}`},
+    {k:'k2', lab:'Biaya per meter terpasang', val: t.volume>0 ? rpS(t.biayaPerMeter) : '&ndash;',
+     foot: t.volume>0 ? m(t.volume)+' m terpasang' : 'belum ada volume tercatat'},
+    {k:'k3', lab:'Bobot upah', val: t.total>0 ? pct(t.upah/t.total) : '&ndash;',
+     foot:'terhadap seluruh biaya'},
+    {k:'k4', lab:'Bobot material', val: t.total>0 ? pct(t.material/t.total) : '&ndash;',
+     foot:'terhadap seluruh biaya'}
+  ]);
+  const kurang = biayaBelumLengkap();
+  const w = document.getElementById('biayaWarn');
+  w.hidden = !kurang.length;
+  if(kurang.length) w.innerHTML = '<b>Angka di bawah belum utuh.</b> Yang belum diisi: '
+    + kurang.join(', ') + '. Bagian yang harganya kosong dihitung nol, jadi biaya terlihat lebih kecil dari sebenarnya.';
+
+  let h = `<table><thead><tr><th>Tanggal</th><th>Area</th><th class="num">Pekerja</th>
+    <th class="num">Upah</th><th class="num">Material</th><th class="num">Operasional</th>
+    <th class="num">Total biaya</th><th class="num">Volume (m)</th>
+    <th class="num">Biaya / m</th></tr></thead><tbody>`;
+  R.daftar.slice(0,120).forEach(r=>{
+    h += `<tr><td style="white-space:nowrap">${tglID(r.tgl)}</td>
+      <td><span class="dot" style="background:${AC[r.area]}"></span>${r.area}</td>
+      <td class="num">${r.orang}${r.tanpaTarif.length? ' <span class="tag warn">'+r.tanpaTarif.length+' tanpa tarif</span>':''}</td>
+      <td class="num">${rp(r.upah)}</td>
+      <td class="num">${r.material? rp(r.material) : (r.materialBaris? '<span class="tag warn">harga kosong</span>':'&ndash;')}</td>
+      <td class="num">${r.opex? rp(r.opex):'&ndash;'}</td>
+      <td class="num"><strong>${rp(r.total)}</strong></td>
+      <td class="num">${r.volume? m(r.volume):'&ndash;'}</td>
+      <td class="num">${r.volume>0 && r.total>0 ? rp(r.total/r.volume) : '&ndash;'}</td></tr>`;
+  });
+  h += `</tbody><tfoot><tr><td colspan="3">Total</td><td class="num">${rp(t.upah)}</td>
+    <td class="num">${rp(t.material)}</td><td class="num">${rp(t.opex)}</td>
+    <td class="num">${rp(t.total)}</td><td class="num">${m(t.volume)}</td>
+    <td class="num">${t.volume>0? rp(t.biayaPerMeter):'&ndash;'}</td></tr></tfoot></table>`;
+  document.getElementById('biayaHarian').innerHTML = h;
+}
+
+function renderMargin(){
+  if(!unlocked()) return;
+  const R = biayaRekap(), t = R.total;
+  const untung = t.margin, persen = t.nilai>0 ? untung/t.nilai : 0;
+  document.getElementById('kpiMargin').innerHTML = kpiHTML([
+    {k:'',   lab:'Pendapatan menurut BOQ', val:rpS(t.nilai),
+     foot:`dari ${m(t.volume)} m terpasang`},
+    {k:'k4', lab:'Biaya aktual', val:rpS(t.total),
+     foot:'upah + material + operasional'},
+    {k: untung>=0 ? 'k2' : 'k4', lab: untung>=0 ? 'Sisa hasil' : 'Kekurangan',
+     val:rpS(Math.abs(untung)), foot: t.nilai>0 ? pct(Math.abs(persen))+' dari pendapatan' : 'belum ada tagihan'},
+    {k:'k3', lab:'Setiap Rp 1.000 tagihan', val: t.nilai>0 ? rp(t.rasio*1000)+' <small>biaya</small>' : '&ndash;',
+     foot: t.nilai>0 ? 'sisa '+rp(1000-t.rasio*1000) : ''}
+  ]);
+
+  let h = `<table><thead><tr><th>Area</th><th class="num">Volume (m)</th>
+    <th class="num">Pendapatan BOQ</th><th class="num">Upah</th><th class="num">Material</th>
+    <th class="num">Operasional</th><th class="num">Total biaya</th>
+    <th class="num">Sisa hasil</th><th class="num">Margin</th></tr></thead><tbody>`;
+  areaAktif().forEach(a=>{
+    const r = biayaRekap(a).total;
+    const sisa = r.nilai - r.total;
+    const mg = r.nilai>0 ? sisa/r.nilai : 0;
+    const tag = r.nilai<=0 ? '' : mg>=0.15 ? 'ok' : mg>=0 ? 'warn' : 'bad';
+    h += `<tr><td><span class="dot" style="background:${AC[a]}"></span><strong>${a}</strong></td>
+      <td class="num">${m(r.volume)}</td><td class="num">${rp(r.nilai)}</td>
+      <td class="num">${rp(r.upah)}</td><td class="num">${rp(r.material)}</td>
+      <td class="num">${rp(r.opex)}</td><td class="num">${rp(r.total)}</td>
+      <td class="num">${rp(sisa)}</td>
+      <td class="num">${r.nilai>0 ? `<span class="tag ${tag}">${pct(mg)}</span>` : '&ndash;'}</td></tr>`;
+  });
+  const sisaT = t.nilai - t.total;
+  h += `</tbody><tfoot><tr><td>Total</td><td class="num">${m(t.volume)}</td>
+    <td class="num">${rp(t.nilai)}</td><td class="num">${rp(t.upah)}</td>
+    <td class="num">${rp(t.material)}</td><td class="num">${rp(t.opex)}</td>
+    <td class="num">${rp(t.total)}</td><td class="num">${rp(sisaT)}</td>
+    <td class="num">${t.nilai>0? pct(sisaT/t.nilai):'&ndash;'}</td></tr></tfoot></table>`;
+  document.getElementById('marginArea').innerHTML = h;
+
+  document.getElementById('marginCatatan').innerHTML = `
+    <ol style="margin:0;padding-left:20px;color:var(--slate);font-size:13px;line-height:1.75">
+      <li><strong>Pendapatan</strong> dihitung dari volume terpasang dikali harga satuan BOQ (upah + material + sewa alat menurut kontrak). Ini nilai yang berhak ditagihkan, bukan uang yang sudah diterima.</li>
+      <li><strong>Upah aktual</strong> dihitung sendiri dari absensi: jumlah orang berstatus Hadir dikali tarif hariannya. Orang yang izin, sakit, atau alpa tidak dihitung.</li>
+      <li><strong>Material aktual</strong> dari catatan pemakaian harian dikali harga beli. Ini pemakaian di lapangan, belum tentu sama dengan pembelian.</li>
+      <li><strong>Yang belum masuk hitungan:</strong> gaji staf kantor, penyusutan alat milik sendiri, biaya administrasi, pajak, dan retensi. Angka sisa hasil di sini adalah margin lapangan, bukan laba bersih perusahaan.</li>
+      <li>Selama harga material belum diisi, biaya terlihat lebih kecil dan margin terlihat lebih besar dari sebenarnya.</li>
+    </ol>`;
 }
 
 /* =====================================================================
@@ -2985,7 +3488,7 @@ function exportJSON(){
   save();
   const w = document.getElementById('storeWarn');
   if(storeOK){ w.hidden = true; }
-  toast('Cadangan terunduh. Simpan berkasnya di Google Drive supaya aman.');
+  toast('Cadangan terunduh. Simpan berkasnya di tempat yang aman.');
 }
 function exportCSV(){
   const head = ['Tanggal','Area','Item','Tebal (mm)','Volume (m)','Target m/hari','Hari-standar',
@@ -3067,6 +3570,52 @@ document.addEventListener('click', ev=>{
       .then(()=>srvTarik()).then(()=>{ render(); toast('Foto dihapus.'); })
       .catch(e=>toast(e.message));
   }
+  if(ev.target.closest('#btnTambahJab')){
+    const el = document.getElementById('jabBaru');
+    const j = el ? el.value.trim() : '';
+    if(j.length < 3){ toast('Nama jabatan minimal 3 huruf.'); return; }
+    DB.upahJabatan = DB.upahJabatan || {};
+    if(DB.upahJabatan[j] != null){ toast('Jabatan itu sudah ada.'); return; }
+    DB.upahJabatan[j] = 0;
+    save(); render(); toast('Jabatan "'+j+'" ditambahkan. Isi tarifnya lalu simpan.');
+    return;
+  }
+  const pgr = ev.target.closest('[data-pgreset]');
+  if(pgr){
+    const nama = pgr.dataset.pgreset;
+    const baru = prompt('Kata sandi baru untuk ' + nama + ' (minimal 6 karakter).\n\n'
+      + 'Sandi lamanya tidak bisa dilihat, jadi beritahukan yang baru ini kepadanya.', '');
+    if(baru === null) return;
+    if(baru.trim().length < 6){ toast('Sandi minimal 6 karakter.'); return; }
+    srvPost('penggunaSandi', {nama, sandiBaru:baru.trim()})
+      .then(()=>{ toast('Sandi ' + nama + ' sekarang: ' + baru.trim()); return muatPengguna(); })
+      .catch(e=>toast(e.message));
+    return;
+  }
+  const pga = ev.target.closest('[data-pgaktif]');
+  if(pga){
+    const nama = pga.dataset.pgaktif, aktif = pga.dataset.nilai === '1';
+    if(!aktif && !confirm('Cabut akses ' + nama + '? Dia tidak bisa masuk lagi, '
+      + 'tetapi riwayat pekerjaannya tetap tersimpan.')) return;
+    srvPost('penggunaAktif', {nama, aktif})
+      .then(()=>{ toast(nama + (aktif ? ' diaktifkan.' : ' dicabut aksesnya.')); return muatPengguna(); })
+      .catch(e=>toast(e.message));
+    return;
+  }
+  const dpk = ev.target.closest('[data-delpakai]');
+  if(dpk && confirm('Hapus catatan pemakaian material ini?')){
+    DB.pemakaian = DB.pemakaian.filter(x=>x.id!==dpk.dataset.delpakai);
+    catat('hapus','Hapus catatan pemakaian material');
+    srvSimpan('simpanKonfig', {kunci:'pemakaian', nilai:JSON.stringify(DB.pemakaian)}, 'Pemakaian material');
+    save(); render(); toast('Dihapus.');
+  }
+  const dop = ev.target.closest('[data-delopex]');
+  if(dop && confirm('Hapus catatan biaya operasional ini?')){
+    DB.opex = DB.opex.filter(x=>x.id!==dop.dataset.delopex);
+    catat('hapus','Hapus catatan biaya operasional');
+    srvSimpan('simpanKonfig', {kunci:'opex', nilai:JSON.stringify(DB.opex)}, 'Biaya operasional');
+    save(); render(); toast('Dihapus.');
+  }
   const dp = ev.target.closest('[data-delplan]');
   if(dp){
     DB.plan = DB.plan.filter(x=>x.id!==dp.dataset.delplan);
@@ -3085,33 +3634,33 @@ document.addEventListener('keydown', ev=>{
   if(ev.key === 'Enter' && ev.target.id && /^pw[12]$/.test(ev.target.id)) tryUnlock(ev.target.id);
 });
 
-document.getElementById('btnLock').onclick = ()=>{
+El('btnLock').onclick = ()=>{
   RATE = null; PASS = null; renderGates(); render(); showPanel('ringkasan');
   toast('Menu nilai dikunci kembali.');
 };
-document.getElementById('petugas').oninput = ()=>{
+El('petugas').oninput = ()=>{
   DB.petugas = document.getElementById('petugas').value.trim(); save();
 };
-document.getElementById('logAksi').onchange = renderAktivitas;
-document.getElementById('logPetugas').onchange = renderAktivitas;
-document.getElementById('fTgl').onchange  = ()=>{ muatBawaan(); syncAbsToForm(); };
-document.getElementById('fArea').onchange = ()=>{ muatBawaan(); syncAbsToForm(); };
-document.getElementById('aTgl').onchange  = renderAbsensi;
-document.getElementById('aArea').onchange = renderAbsensi;
-document.getElementById('btnSaveAbs').onclick = saveAbsensi;
-document.getElementById('rekapBulan').onchange = renderRekapAbs;
-document.getElementById('btnCsvAbs').onclick = exportCSVAbs;
-document.getElementById('btnAllH').onclick = ()=>{
+El('logAksi').onchange = renderAktivitas;
+El('logPetugas').onchange = renderAktivitas;
+El('fTgl').onchange = ()=>{ muatBawaan(); syncAbsToForm(); };
+El('fArea').onchange = ()=>{ muatBawaan(); syncAbsToForm(); };
+El('aTgl').onchange = renderAbsensi;
+El('aArea').onchange = renderAbsensi;
+El('btnSaveAbs').onclick = saveAbsensi;
+El('rekapBulan').onchange = renderRekapAbs;
+El('btnCsvAbs').onclick = exportCSVAbs;
+El('btnAllH').onclick = ()=>{
   document.querySelectorAll('#absList .absrow').forEach(r=>{
     r.querySelectorAll('.st').forEach(x=>x.setAttribute('aria-pressed', x.dataset.st==='H' ? 'true':'false'));
   });
   absSummary();
 };
-document.getElementById('btnAllClear').onclick = ()=>{
+El('btnAllClear').onclick = ()=>{
   document.querySelectorAll('#absList .st').forEach(x=>x.setAttribute('aria-pressed','false'));
   absSummary();
 };
-document.getElementById('btnAddKar').onclick = ()=>{
+El('btnAddKar').onclick = ()=>{
   const nik = document.getElementById('kNik').value.trim();
   const nama = document.getElementById('kNama').value.trim();
   if(!nik || !nama){ toast('NIK dan nama wajib diisi.'); return; }
@@ -3124,21 +3673,21 @@ document.getElementById('btnAddKar').onclick = ()=>{
   srvSimpan('simpanKaryawan', {karyawan:DB.karyawan[DB.karyawan.length-1]}, 'Karyawan ' + nama);
   save(); render(); toast(nama + ' ditambahkan.');
 };
-document.getElementById('btnFpPick').onclick = ()=>document.getElementById('fpFile').click();
-document.getElementById('fpFile').onchange = ev=>{
+El('btnFpPick').onclick = ()=>document.getElementById('fpFile').click();
+El('fpFile').onchange = ev=>{
   const f = ev.target.files[0]; if(!f) return;
   const r = new FileReader();
   r.onload = ()=> fpLoad(String(r.result), f.name);
   r.readAsText(f, 'utf-8');
   ev.target.value = '';
 };
-document.getElementById('btnFpApply').onclick = fpApply;
-document.getElementById('btnFpCancel').onclick = ()=>{
+El('btnFpApply').onclick = fpApply;
+El('btnFpCancel').onclick = ()=>{
   FP = null;
   document.getElementById('fpConfig').hidden = true;
   document.getElementById('fpName').textContent = 'Belum ada berkas dipilih.';
 };
-document.getElementById('gerbangMasukBtn').onclick = ()=>{
+El('gerbangMasukBtn').onclick = ()=>{
   masukDenganSandi(document.getElementById('gerbangNama').value,
                    document.getElementById('gerbangSandi').value,
                    document.getElementById('gerbangIngat').checked);
@@ -3148,7 +3697,7 @@ document.getElementById('gerbangMasukBtn').onclick = ()=>{
     if(ev.key === 'Enter') document.getElementById('gerbangMasukBtn').click();
   };
 });
-document.getElementById('btnGantiPetugas').onclick = ()=>{
+El('btnGantiPetugas').onclick = ()=>{
   const n = prompt('Siapa yang memakai dashboard sekarang?', DB.petugas || '');
   if(n === null) return;
   const nama = n.trim();
@@ -3160,66 +3709,168 @@ document.getElementById('btnGantiPetugas').onclick = ()=>{
   render();
   toast('Petugas sekarang: ' + nama);
 };
-document.getElementById('btnSrvMasuk').onclick = ()=>{
+El('btnSrvMasuk').onclick = ()=>{
   const u = document.getElementById('srvUrl').value.trim();
   const s = document.getElementById('srvSandi').value.trim();
   if(!u){ toast('URL server belum diisi.'); return; }
   if(!s){ toast('Kata sandi belum diisi.'); return; }
   srvLogin(u, s).then(()=>{ document.getElementById('srvSandi').value=''; }).catch(()=>{});
 };
-document.getElementById('btnSrvUji').onclick = ()=>{
+El('btnSrvUji').onclick = ()=>{
   const u = document.getElementById('srvUrl').value.trim();
   if(!u){ toast('URL server belum diisi.'); return; }
   DB.serverUrl = u; save();
   srvPost('ping', {}).then(j=>toast('Server menjawab. Versi ' + (j.versi||'-') + ', waktu server ' + (j.waktu||'-') + '.'))
     .catch(e=>toast(e.message));
 };
-document.getElementById('btnSrvTarik').onclick = ()=>{
+El('btnSrvTarik').onclick = ()=>{
   if(!srvMasuk_()){ toast('Masuk ke server dulu.'); return; }
   srvTarik().then(()=>{ render(); toast('Data terbaru ditarik dari server.'); })
             .catch(e=>toast(e.message));
 };
-document.getElementById('btnSrvAntri').onclick = ()=>{
+El('btnSrvAntri').onclick = ()=>{
   if(!srvMasuk_()){ toast('Masuk ke server dulu.'); return; }
   srvKirimAntrian().then(n=>toast(n ? (n + ' perubahan berhasil dikirim.') : 'Tidak ada yang perlu dikirim.'));
 };
-document.getElementById('btnSrvKeluar').onclick = ()=>{
+El('btnSrvKeluar').onclick = ()=>{
   SRV.peran=''; SRV.sandi=''; RATE=null; PASS=null;
   DB.sandiIngat=''; save();
   tandaServer(); renderGates(); render(); showPanel('ringkasan');
   if(srvAda()) tampilGerbang('Anda sudah keluar. Masukkan kata sandi untuk masuk lagi.', 'info');
   toast('Keluar.');
 };
-document.getElementById('btnSrvKirimSemua').onclick = ()=>{
+El('btnPgMuat').onclick = ()=> muatPengguna();
+El('btnPgTambah').onclick = ()=>{
+  const nama = (document.getElementById('pgNama')||{}).value || '';
+  const sandi = (document.getElementById('pgSandi')||{}).value || '';
+  const peran = (document.getElementById('pgPeran')||{}).value || 'lapangan';
+  if(nama.trim().length < 3){ pgPesan('Nama minimal 3 huruf', false); return; }
+  if(sandi.trim().length < 6){ pgPesan('Sandi minimal 6 karakter', false); return; }
+  srvPost('penggunaSimpan', {nama:nama.trim(), sandiBaru:sandi.trim(), peran})
+    .then(j=>{
+      pgPesan(j.nama + ' ditambahkan sebagai ' + j.peran, true);
+      toast('Catat sandinya sekarang: ' + sandi.trim() + ' — tidak bisa dilihat lagi setelah ini.');
+      document.getElementById('pgNama').value = '';
+      document.getElementById('pgSandi').value = '';
+      return muatPengguna();
+    })
+    .catch(e=>{ pgPesan(e.message, false); toast(e.message); });
+};
+El('btnSrvKirimSemua').onclick = ()=>{
   if(!confirm('Kirim SELURUH data browser ke server? Lakukan hanya sekali, dari satu perangkat saja.')) return;
   srvKirimSemua();
 };
-document.getElementById('btnFotoPilih').onclick = ()=>document.getElementById('fotoFile').click();
-document.getElementById('fotoFile').onchange = ev=>{
+El('btnFotoPilih').onclick = ()=>document.getElementById('fotoFile').click();
+El('fotoFile').onchange = ev=>{
   if(ev.target.files && ev.target.files.length) unggahFoto(ev.target.files);
   ev.target.value = '';
 };
-document.getElementById('btnAddItem').onclick = ()=>addItemRow();
-document.getElementById('btnSave').onclick    = saveEntry;
-document.getElementById('btnReset').onclick   = ()=>{ resetForm(); toast('Formulir dikosongkan.'); };
-document.getElementById('logFilter').onchange = renderLog;
-document.getElementById('planFilter').onchange= renderPlan;
-document.getElementById('pItem').onchange     = planPreview;
-document.getElementById('pVol').oninput       = planPreview;
-document.getElementById('btnCsv').onclick     = exportCSV;
-document.getElementById('btnPrint').onclick   = ()=>window.print();
-document.getElementById('btnExport2').onclick = exportJSON;
-document.getElementById('btnSeed').onclick    = seed;
-document.getElementById('btnSeed2').onclick   = ()=>{
+/* ---- biaya aktual ---- */
+function isiPilihanBiaya(){
+  const opsiArea = AREAS.map(a=>`<option>${a}</option>`).join('');
+  ['pkArea','opArea'].forEach(id=>{ const el=document.getElementById(id);
+    if(el && !el.options.length) el.innerHTML = opsiArea; });
+  const pk = document.getElementById('pkKomponen');
+  if(pk && !pk.options.length) pk.innerHTML = opsiKomponen();
+  const pi = document.getElementById('pkItem');
+  if(pi && !pi.options.length) pi.innerHTML = ITEMS.filter(i=>i.g==='Pipa')
+    .map(i=>`<option value="${i.id}">${esc(i.n)}</option>`).join('');
+  const hariIni = new Date().toISOString().slice(0,10);
+  ['pkTgl','opTgl'].forEach(id=>{ const el=document.getElementById(id); if(el && !el.value) el.value = hariIni; });
+  aturUkuran();
+}
+function aturUkuran(){
+  const pk = document.getElementById('pkKomponen');
+  const w  = document.getElementById('pkUkuranWrap');
+  if(!pk || !w) return;
+  w.style.display = (MAT[pk.value] && MAT[pk.value].perUkuran) ? '' : 'none';
+}
+El('pkKomponen').onchange = aturUkuran;
+El('btnAddPakai').onclick = ()=>{
+  const qty = +document.getElementById('pkQty').value||0;
+  if(!qty){ toast('Jumlah pemakaian belum diisi.'); return; }
+  const k = document.getElementById('pkKomponen').value;
+  const rec = {id:'pk'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+    tgl:document.getElementById('pkTgl').value, area:document.getElementById('pkArea').value,
+    komponen:k, itemId: (MAT[k]&&MAT[k].perUkuran) ? document.getElementById('pkItem').value : '',
+    qty, ket:document.getElementById('pkKet').value.trim(), by:petugasAktif()};
+  if(!rec.tgl){ toast('Tanggal belum diisi.'); return; }
+  DB.pemakaian.push(rec);
+  catat('boq', 'Catat pemakaian ' + (MAT[k]||{n:k}).n + ' ' + nf2.format(qty) + ' di ' + rec.area);
+  srvSimpan('simpanKonfig', {kunci:'pemakaian', nilai:JSON.stringify(DB.pemakaian)}, 'Pemakaian material');
+  document.getElementById('pkQty').value=''; document.getElementById('pkKet').value='';
+  save(); render(); toast('Pemakaian dicatat.');
+};
+El('btnAddOpex').onclick = ()=>{
+  const n = +document.getElementById('opNominal').value||0;
+  if(!n){ toast('Nominal belum diisi.'); return; }
+  const rec = {id:'op'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+    tgl:document.getElementById('opTgl').value, area:document.getElementById('opArea').value,
+    jenis:document.getElementById('opJenis').value, nominal:n,
+    ket:document.getElementById('opKet').value.trim(), by:petugasAktif()};
+  if(!rec.tgl){ toast('Tanggal belum diisi.'); return; }
+  DB.opex.push(rec);
+  catat('boq', 'Catat biaya ' + rec.jenis + ' ' + rp(n) + ' di ' + rec.area);
+  srvSimpan('simpanKonfig', {kunci:'opex', nilai:JSON.stringify(DB.opex)}, 'Biaya operasional');
+  document.getElementById('opNominal').value=''; document.getElementById('opKet').value='';
+  save(); render(); toast('Biaya dicatat.');
+};
+El('btnAddJenis').onclick = ()=>{
+  const j = document.getElementById('opJenisBaru').value.trim();
+  if(j.length < 3){ toast('Nama jenis biaya minimal 3 huruf.'); return; }
+  DB.opexJenis = DB.opexJenis || [];
+  if(DB.opexJenis.indexOf(j) >= 0){ toast('Jenis itu sudah ada.'); return; }
+  DB.opexJenis.push(j);
+  document.getElementById('opJenis').innerHTML = DB.opexJenis.map(x=>`<option>${esc(x)}</option>`).join('');
+  document.getElementById('opJenisBaru').value = '';
+  srvSimpan('simpanKonfig', {kunci:'opexJenis', nilai:JSON.stringify(DB.opexJenis)}, 'Jenis biaya');
+  save(); toast('Jenis biaya "'+j+'" ditambahkan.');
+};
+El('btnSaveUpah').onclick = ()=>{
+  DB.upahJabatan = DB.upahJabatan || {}; DB.upahOrang = DB.upahOrang || {};
+  document.querySelectorAll('[data-uj]').forEach(i=> DB.upahJabatan[i.dataset.uj] = +i.value||0);
+  document.querySelectorAll('[data-uo]').forEach(i=>{
+    const v = +i.value||0;
+    if(v > 0) DB.upahOrang[i.dataset.uo] = v; else delete DB.upahOrang[i.dataset.uo];
+  });
+  catat('boq', 'Ubah tarif upah harian');
+  srvSimpan('simpanKonfig', {kunci:'upahJabatan', nilai:JSON.stringify(DB.upahJabatan)}, 'Tarif jabatan');
+  srvSimpan('simpanKonfig', {kunci:'upahOrang',   nilai:JSON.stringify(DB.upahOrang)},   'Tarif per orang');
+  save(); render(); toast('Tarif upah tersimpan. Biaya dihitung ulang.');
+};
+El('btnSaveHargaMat').onclick = ()=>{
+  DB.hargaMaterial = DB.hargaMaterial || {};
+  document.querySelectorAll('[data-hm]').forEach(i=>{
+    const k = i.dataset.hm, ui = i.dataset.hmi, v = +i.value||0;
+    if(ui){ DB.hargaMaterial[k] = DB.hargaMaterial[k] || {};
+      if(v>0) DB.hargaMaterial[k][ui] = v; else delete DB.hargaMaterial[k][ui];
+    }else{ if(v>0) DB.hargaMaterial[k] = v; else delete DB.hargaMaterial[k]; }
+  });
+  catat('boq', 'Ubah harga material');
+  srvSimpan('simpanKonfig', {kunci:'hargaMaterial', nilai:JSON.stringify(DB.hargaMaterial)}, 'Harga material');
+  save(); render(); toast('Harga material tersimpan.');
+};
+El('btnAddItem').onclick = ()=>addItemRow();
+El('btnSave').onclick = saveEntry;
+El('btnReset').onclick = ()=>{ resetForm(); toast('Formulir dikosongkan.'); };
+El('logFilter').onchange = renderLog;
+El('planFilter').onchange = renderPlan;
+El('pItem').onchange = planPreview;
+El('pVol').oninput = planPreview;
+El('btnCsv').onclick = exportCSV;
+El('btnPrint').onclick = ()=>window.print();
+El('btnExport2').onclick = exportJSON;
+El('btnSeed').onclick = seed;
+El('btnSeed2').onclick = ()=>{
   if(!DB.entries.length || confirm('Data contoh akan menimpa seluruh catatan dan rencana yang ada. Lanjutkan?')) seed();
 };
-document.getElementById('btnWipe').onclick = ()=>{
+El('btnWipe').onclick = ()=>{
   if(confirm('Hapus SEMUA catatan harian? Rencana, harga satuan, dan target tetap tersimpan.')){
     DB.entries = []; catat('hapus', 'Hapus SELURUH catatan harian');
     save(); render(); toast('Semua catatan harian dihapus.');
   }
 };
-document.getElementById('btnAddPlan').onclick = ()=>{
+El('btnAddPlan').onclick = ()=>{
   const vol = +document.getElementById('pVol').value||0;
   if(!vol){ toast('Volume rencana belum diisi.'); return; }
   DB.plan.push({id:'pl'+Date.now().toString(36), area:document.getElementById('pArea').value,
@@ -3233,7 +3884,7 @@ document.getElementById('btnAddPlan').onclick = ()=>{
     + (ITEM[document.getElementById('pItem').value]||{n:''}).n + ' ' + m(vol) + ' m');
   save(); render(); toast('Item ditambahkan ke rencana.');
 };
-document.getElementById('btnPlanBoq').onclick = ()=>{
+El('btnPlanBoq').onclick = ()=>{
   if(DB.plan.length && !confirm('Rencana yang ada akan diganti dengan seluruh volume BOQ. Lanjutkan?')) return;
   const p = [];
   areaAktif().forEach(a=>{
@@ -3242,8 +3893,8 @@ document.getElementById('btnPlanBoq').onclick = ()=>{
   });
   DB.plan = p; save(); render(); toast('Rencana diisi dari volume BOQ ('+p.length+' baris).');
 };
-document.getElementById('boqArea').onchange = renderBoq;
-document.getElementById('btnSaveBoq').onclick = ()=>{
+El('boqArea').onchange = renderBoq;
+El('btnSaveBoq').onclick = ()=>{
   if(!unlocked()) return;
   const a = document.getElementById('boqArea').value;
   RATE[a] = RATE[a] || {}; DB.boqVol[a] = DB.boqVol[a] || {};
@@ -3259,13 +3910,13 @@ document.getElementById('btnSaveBoq').onclick = ()=>{
   srvSimpan('simpanKonfig', {kunci:'boqVol', nilai:JSON.stringify(DB.boqVol)}, 'Volume BOQ');
   save(); render(); toast('BOQ dan harga satuan '+a+' tersimpan.');
 };
-document.getElementById('btnSaveTarget').onclick = ()=>{
+El('btnSaveTarget').onclick = ()=>{
   document.querySelectorAll('[data-tg]').forEach(i=> DB.target[i.dataset.tg] = +i.value||0);
   catat('boq', 'Ubah target produktivitas per item');
   srvSimpan('simpanKonfig', {kunci:'target', nilai:JSON.stringify(DB.target)}, 'Target produktivitas');
   save(); render(); toast('Target produktivitas diperbarui. Seluruh durasi dan capaian dihitung ulang.');
 };
-document.getElementById('btnChgPw').onclick = ()=>{
+El('btnChgPw').onclick = ()=>{
   if(!unlocked()) return;
   const o = document.getElementById('pwOld').value.trim();
   const n1 = document.getElementById('pwNew').value.trim();
@@ -3277,8 +3928,8 @@ document.getElementById('btnChgPw').onclick = ()=>{
   ['pwOld','pwNew','pwNew2'].forEach(i=>document.getElementById(i).value='');
   toast('Kata sandi diganti. Simpan cadangan sekarang supaya sandi baru ikut terarsip.');
 };
-document.getElementById('btnImport2').onclick = ()=>document.getElementById('fileImport').click();
-document.getElementById('fileImport').onchange = ev=>{
+El('btnImport2').onclick = ()=>document.getElementById('fileImport').click();
+El('fileImport').onchange = ev=>{
   const f = ev.target.files[0]; if(!f) return;
   const r = new FileReader();
   r.onload = ()=>{
@@ -3300,6 +3951,18 @@ document.getElementById('fileImport').onchange = ev=>{
   ev.target.value = '';
 };
 
+/* Kalau masih ada kesalahan tak terduga, tampilkan pesan yang bisa dibaca
+   daripada halaman kosong tanpa penjelasan. */
+window.addEventListener('error', function(ev){
+  var w = document.getElementById('storeWarn');
+  if(!w || !w.hidden) return;
+  w.hidden = false;
+  w.className = 'banner';
+  w.innerHTML = '<b>Ada bagian dashboard yang gagal dimuat.</b> '
+    + 'Coba muat ulang dengan Ctrl+Shift+R. Bila tetap muncul, kirimkan tulisan ini: <code>'
+    + esc(String(ev.message || '')).slice(0, 160) + '</code>';
+});
+
 /* ---- jalan ---- */
 function tickClock(){
   const n = new Date();
@@ -3313,6 +3976,7 @@ load();
 document.getElementById('aTgl').value = new Date().toISOString().slice(0,10);
 document.getElementById('petugas').value = DB.petugas || '';
 document.getElementById('fotoTgl').value = new Date().toISOString().slice(0,10);
+isiPilihanBiaya();
 renderTabs();
 renderGates();
 resetForm();
