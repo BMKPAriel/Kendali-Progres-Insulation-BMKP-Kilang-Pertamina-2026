@@ -730,7 +730,7 @@ svg{display:block;max-width:100%} .chartwrap{overflow-x:auto}
     <div id="gerbangPesan" class="banner info" hidden></div>
     <label class="field" style="text-align:left">
       <span>Nama Anda</span>
-      <input type="text" id="gerbangNama" placeholder="mis. Fatah" autocomplete="name">
+      <input type="text" id="gerbangNama" placeholder="mis. Fajar" autocomplete="name">
       <span class="ghint" style="margin:5px 0 0;display:block">Boleh dikosongkan bila sandi Anda pribadi.</span>
     </label>
     <label class="field" style="text-align:left">
@@ -2428,6 +2428,11 @@ function srvPost(aksi, extra){
     method:'POST', redirect:'follow',
     headers:{'Content-Type':'text/plain;charset=utf-8'},   /* teks biasa supaya tidak kena preflight CORS */
     body: JSON.stringify(badan)
+  }).catch(function(){
+    /* Permintaan tidak pernah sampai. Ini bukan soal sandi. */
+    var e = new Error('TIDAK_TERHUBUNG');
+    e.jaringan = true;
+    throw e;
   }).then(function(r){ return r.text(); }).then(function(t){
     var j;
     try{ j = JSON.parse(t); }
@@ -2840,8 +2845,28 @@ function masukDenganSandi(nama, sandi, ingat){
   }).catch(function(e){
     sibukGerbang(false);
     DB.sandiIngat = ''; save();
-    tampilGerbang('<b>' + esc(e.message) + '</b><br>Hubungi pengelola bila sandi Anda tidak berlaku.', '');
+    tampilGerbang(pesanGagal(e), '');
   });
+}
+
+/* Pesan yang membedakan gangguan sambungan dari sandi yang salah,
+   supaya tidak sia-sia mencoba sandi berulang kali. */
+function pesanGagal(e){
+  var m = String((e && e.message) || '');
+  if((e && e.jaringan) || m === 'TIDAK_TERHUBUNG'){
+    return '<b>Tidak bisa menghubungi pusat data.</b><br>'
+      + 'Sandi Anda belum sempat diperiksa, jadi <b>bukan sandi yang bermasalah</b>. '
+      + 'Periksa sambungan internet lalu coba lagi. Bila jaringan normal tetapi tetap begini, '
+      + 'hubungi pengelola.';
+  }
+  if(m.indexOf('tidak menjawab dengan benar') >= 0){
+    return '<b>Pusat data menjawab tetapi tidak seperti seharusnya.</b><br>'
+      + 'Ini <b>bukan soal sandi</b>. Hubungi pengelola.';
+  }
+  if(m.indexOf('sibuk') >= 0){
+    return '<b>Pusat data sedang sibuk.</b><br>Tunggu beberapa detik lalu coba lagi.';
+  }
+  return '<b>Nama atau kata sandi tidak dikenali.</b><br>Hubungi pengelola bila sandi Anda tidak berlaku.';
 }
 
 /* Catat pembukaan. Untuk sandi perorangan, server sudah mencatat sendiri
@@ -2872,7 +2897,9 @@ function mulaiMasuk(){
     }).catch(function(e){
       sibukGerbang(false);
       DB.sandiIngat = ''; save();
-      tampilGerbang('Sesi Anda sudah berakhir. Masuk kembali.', '');
+      tampilGerbang(e && e.jaringan
+        ? '<b>Tidak bisa menghubungi pusat data.</b><br>Periksa sambungan internet lalu coba lagi.'
+        : 'Sesi Anda sudah berakhir. Masuk kembali.', '');
     });
     return;
   }
@@ -3458,7 +3485,7 @@ function seed(){
   }
   DB.entries = out; DB.plan = plan; DB.karyawan = kar; DB.absensi = abs;
   DB.log = [];
-  const nama = ['Fatah','Rian','Admin BMKP'];
+  const nama = ['Fajar','Rian','Admin BMKP'];
   out.slice(-18).forEach(e=>{
     DB.log.push({ts:new Date(e.tgl+'T17:'+(10+Math.floor(Math.random()*40))+':00').toISOString(),
       who:nama[Math.floor(Math.random()*nama.length)], aksi:'progres', mode:'lapangan',
