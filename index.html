@@ -491,7 +491,8 @@ function pgLine(){
      '<div style="flex:0 0 auto"><button class="btn a3" id="lUnduh">Unduh daftar</button></div>'+
    '</div></div>'+
    '<div class="kartu sembunyi" id="lKotakCsv"><h3>Impor daftar line dari CSV</h3>'+
-     '<div class="mini">Berguna saat mendaftarkan banyak line sekaligus dari BOQ. Untuk catatan harian, tetap lewat Input harian.</div>'+
+     '<div class="mini">Berguna saat mendaftarkan banyak line sekaligus dari BOQ. Bisa <b>Excel (.xlsx)</b> maupun CSV — '+
+     'yang penting judul kolomnya seperti contoh di bawah. Untuk catatan harian, tetap lewat Input harian.</div>'+
      '<div class="gulir" style="margin:10px 0"><table><thead><tr>'+
        '<th>no_line</th><th>unit_plant</th><th>kode_boq</th><th>volume</th><th>elbow</th>'+
      '</tr></thead><tbody>'+
@@ -503,8 +504,8 @@ function pgLine(){
      '<b>kode_boq</b> diisi persis seperti nomor di kontrak — lihat daftarnya di menu Master. '+
      'Line yang namanya sudah ada akan dilewati, tidak ditimpa.</div>'+
      '<div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
-       '<button class="btn a3 kecil" id="lContoh">Unduh contoh CSV</button>'+
-       '<input type="file" accept=".csv,text/csv" id="lFile" style="font-size:13px">'+
+       '<button class="btn a3 kecil" id="lContoh">Unduh contoh</button>'+
+       '<input type="file" accept=".xlsx,.xls,.csv,text/csv" id="lFile" style="font-size:13px">'+
      '</div>'+
      '<div id="lHasil" style="margin-top:10px"></div>'+
    '</div>'+
@@ -549,13 +550,49 @@ function uraiCsv(teks){
   }).filter(function(r){ return r.noLine; });
 }
 
+function baristoObjek(matriks){
+  if(!matriks || matriks.length < 2) return [];
+  var kepala = matriks[0].map(function(h){ return String(h).trim().toLowerCase().replace(/\s+/g,'_'); });
+  return matriks.slice(1).map(function(sel){
+    var o = {};
+    kepala.forEach(function(h,i){ o[h] = String(sel[i]==null?'':sel[i]).trim(); });
+    return {
+      noLine: o['no_line'] || o['noline'] || o['line'] || '',
+      unitPlant: o['unit_plant'] || o['unit'] || o['plant'] || '',
+      kodeBOQ: o['kode_boq'] || o['kode'] || o['kodeboq'] || '',
+      volume: (o['volume'] || o['panjang'] || '').replace(',','.'),
+      elbow: o['elbow'] || ''
+    };
+  }).filter(function(r){ return r.noLine; });
+}
+
 function imporCsv(){
   var f = el('lFile').files[0]; if(!f) return;
+  var xls = /\.xlsx?$/i.test(f.name);
   var fr = new FileReader();
   fr.onload = function(){
-    var baris = uraiCsv(fr.result);
+    var baris;
+    try {
+      if(xls){
+        var wb = XLSX.read(new Uint8Array(fr.result), {type:'array'});
+        var mtx = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, raw:false, defval:''});
+        // buang baris judul kosong di atas, cari baris yang memuat 'no_line'
+        var mulai = 0;
+        for(var i=0;i<Math.min(15,mtx.length);i++){
+          if(mtx[i].join(' ').toLowerCase().indexOf('no_line')>=0 ||
+             mtx[i].join(' ').toLowerCase().indexOf('no line')>=0){ mulai=i; break; }
+        }
+        baris = baristoObjek(mtx.slice(mulai));
+      } else {
+        baris = uraiCsv(String(fr.result));
+      }
+    } catch(e){
+      el('lHasil').innerHTML = '<div class="pesan bad">Berkas tidak bisa dibaca: '+esc(e.message)+'</div>'; return;
+    }
     if(!baris.length){
-      el('lHasil').innerHTML = '<div class="pesan bad">Tidak ada baris terbaca. Pastikan judul kolomnya sama dengan contoh di atas.</div>';
+      el('lHasil').innerHTML = '<div class="pesan bad">Tidak ada baris terbaca. '+
+        'Pastikan barisan judulnya memuat <b>no_line</b>, <b>kode_boq</b>, dan <b>volume</b> — '+
+        'lihat contoh tabel di atas. Berkas absensi finger tidak bisa dipakai di sini; itu untuk menu Absensi finger.</div>';
       return;
     }
     if(!confirm('Akan diimpor '+baris.length+' baris ke area '+S.area+'. Lanjutkan?')) return;
@@ -569,7 +606,7 @@ function imporCsv(){
      })
      .catch(function(e){ sibuk(false); el('lHasil').innerHTML='<div class="pesan bad">'+esc(e.message)+'</div>'; });
   };
-  fr.readAsText(f);
+  if(xls) fr.readAsArrayBuffer(f); else fr.readAsText(f);
 }
 
 function unduhDaftarLine(){
