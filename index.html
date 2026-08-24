@@ -86,6 +86,7 @@ td input,td select{padding:7px 8px;border-radius:7px}
 @media print{ header,nav,.tombol-bawah{display:none!important} }
 .sembunyi{display:none!important}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -210,15 +211,6 @@ if(ingat){ el('gNama').value = ingat.nama; el('gPin').value = ingat.pin; }
 function simpanSesi(){
   localStorage.setItem('ins_sesi', JSON.stringify({nama:S.nama, peran:S.peran, waktu:Date.now()}));
 }
-// masuk kembali otomatis setelah refresh (berlaku 12 jam)
-(function(){
-  var sesi = null;
-  try { sesi = JSON.parse(localStorage.getItem('ins_sesi')||'null'); } catch(e){}
-  if(sesi && sesi.nama && S.url && (Date.now()-sesi.waktu) < 12*3600*1000){
-    S.nama=sesi.nama; S.peran=sesi.peran; simpanSesi(); mulai();
-  }
-})();
-
 el('gMasuk').onclick = masuk;
 el('gPin').addEventListener('keydown', function(e){ if(e.key==='Enter') masuk(); });
 
@@ -877,9 +869,10 @@ function pgAbsensi(){
   var awal = d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
   el('isi').innerHTML =
    '<div class="kartu"><h3>Langkah 1 — pilih berkas</h3>'+
-     '<div class="mini">Unduh dulu laporan kehadiran dari software mesin finger dalam bentuk CSV atau Excel yang disimpan sebagai CSV. '+
-     'Karena semua pekerja finger di satu pintu, satu berkas ini sudah mencakup MA1, MA2, MA3, dan Utilities sekaligus.</div>'+
-     '<div style="margin-top:10px"><input type="file" accept=".csv,text/csv,.txt" id="aFile"></div>'+
+     '<div class="mini">Unggah langsung berkas <b>Excel (.xlsx)</b> hasil unduhan mesin finger — tidak perlu diubah ke CSV dulu. '+
+     'Format <b>LAPORAN SCAN LOG</b> dikenali otomatis. Karena semua pekerja finger di satu pintu, satu berkas ini '+
+     'sudah mencakup MA1, MA2, MA3, dan Utilities sekaligus.</div>'+
+     '<div style="margin-top:10px"><input type="file" accept=".xlsx,.xls,.csv,.txt" id="aFile"></div>'+
      '<div class="mini" style="margin-top:8px">Areanya diambil dari kolom Area tiap pekerja di menu Master — bukan dari berkas finger, '+
      'karena mesinnya tidak tahu siapa bekerja di area mana.</div>'+
    '</div>'+
@@ -907,21 +900,182 @@ function pgAbsensi(){
 
 function bacaFileAbsensi(){
   var f = el('aFile').files[0]; if(!f) return;
+  var xls = /\.xlsx?$/i.test(f.name);
   var fr = new FileReader();
   fr.onload = function(){
-    var teks = fr.result.replace(/\r/g,'');
-    var baris = teks.split('\n').filter(function(b){ return b.trim(); });
-    if(baris.length < 2){ el('aPeta').innerHTML='<div class="pesan bad">Berkas kosong atau hanya berisi judul.</div>'; return; }
-    var pisah = [',',';','\t','|'].map(function(p){ return {p:p, n:baris[0].split(p).length}; })
-                  .sort(function(a,b){ return b.n-a.n; })[0].p;
-    var kepala = baris[0].split(pisah).map(function(h){ return h.trim().replace(/^"|"$/g,''); });
-    S.absKepala = kepala;
-    S.absBaris = baris.slice(1).map(function(b){
-      return b.split(pisah).map(function(x){ return x.trim().replace(/^"|"$/g,''); });
-    });
-    gambarPemetaan();
+    var matriks;
+    try {
+      if(xls){
+        var wb = XLSX.read(new Uint8Array(fr.result), {type:'array'});
+        matriks = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, raw:false, defval:''});
+      } else {
+        var teks = String(fr.result).replace(/\r/g,'');
+        var brs = teks.split('\n').filter(function(b){ return b.trim(); });
+        var pisah = [',',';','\t','|'].map(function(p){ return {p:p, n:brs[0].split(p).length}; })
+                      .sort(function(a,b){ return b.n-a.n; })[0].p;
+        matriks = brs.map(function(b){ return b.split(pisah).map(function(x){ return x.trim().replace(/^"|"$/g,''); }); });
+      }
+    } catch(e){
+      el('aPeta').innerHTML = '<div class="pesan bad">Berkas tidak bisa dibaca: '+esc(e.message)+'</div>'; return;
+    }
+    if(!matriks || matriks.length < 2){
+      el('aPeta').innerHTML = '<div class="pesan bad">Berkas kosong.</div>'; return;
+    }
+
+    var awal = matriks.slice(0,12).map(function(r){ return r.join(' ').toUpperCase(); }).join(' ');
+    if(awal.indexOf('SCAN LOG') >= 0 || awal.indexOf('PIN / NIP') >= 0){
+      uraiScanLog(matriks);
+    } else {
+      S.absKepala = matriks[0].map(function(h){ return String(h).trim(); });
+      S.absBaris  = matriks.slice(1).map(function(r){ return r.map(function(x){ return String(x).trim(); }); });
+      S.absMode = 'tabel';
+      gambarPemetaan();
+    }
   };
-  fr.readAsText(f);
+  if(xls) fr.readAsArrayBuffer(f); else fr.readAsText(f);
+}
+
+/* Pembaca format "LAPORAN SCAN LOG":
+   tiap orang punya blok Nama / PIN / Jabatan / Departemen, lalu daftar tanggal + jam scan. */
+function uraiScanLog(m){
+  var hasil = [], dep = {}, orang = 0, cur = null;
+  function isi(sel){
+    for(var i=1;i<sel.length;i++){
+      var v = String(sel[i]||'').trim().replace(/^:\s*/,'');
+      if(v) return v;
+    }
+    return '';
+  }
+  m.forEach(function(r){
+    var a = String(r[0]||'').trim();
+    if(/^Nama\b/i.test(a)){ cur = {nama:isi(r), pin:'', jabatan:'', dep:''}; orang++; return; }
+    if(!cur) return;
+    if(/^PIN/i.test(a)){ cur.pin = isi(r).split('/')[0].trim(); return; }
+    if(/^Jabatan/i.test(a)){ cur.jabatan = isi(r); return; }
+    if(/^Departemen/i.test(a)){
+      cur.dep = isi(r).replace(/\/+\s*$/,'').trim();
+      if(cur.dep) dep[cur.dep] = (dep[cur.dep]||0)+1;
+      return;
+    }
+    var t = a.match(/(\d{2})-(\d{2})-(\d{4})/);
+    if(!t) return;
+    var jam = [];
+    for(var i=1;i<r.length;i++){
+      var v = String(r[i]||'').trim();
+      if(/^\d{1,2}[.:]\d{2}/.test(v)) jam.push(v.replace(/\./g,':').slice(0,5));
+    }
+    hasil.push({
+      pin: cur.pin, nama: cur.nama, jabatan: cur.jabatan, dep: cur.dep,
+      tanggal: t[3]+'-'+t[2]+'-'+t[1],
+      jamMasuk: jam[0]||'', jamKeluar: jam.length>1 ? jam[jam.length-1] : ''
+    });
+  });
+  S.absMode = 'scanlog';
+  S.absScan = hasil;
+  S.absDep = Object.keys(dep).sort();
+  S.absOrang = orang;
+  gambarPetaDepartemen();
+}
+
+function tebakArea(d){
+  var u = String(d).toUpperCase();
+  if(u.indexOf('MA-1')>=0 || u.indexOf('MA1')>=0 || u.indexOf('STEAM')>=0) return 'MA1';
+  if(u.indexOf('MA-2')>=0 || u.indexOf('MA2')>=0) return 'MA2';
+  if(u.indexOf('MA-3')>=0 || u.indexOf('MA3')>=0) return 'MA3';
+  if(u.indexOf('UTIL')>=0) return 'Utilities';
+  return '';
+}
+
+function gambarPetaDepartemen(){
+  var simpan = {};
+  String(S.master.setting.petaDepartemen||'').split(';').forEach(function(p){
+    var x = p.split('='); if(x.length===2) simpan[x[0].trim()] = x[1].trim();
+  });
+  var tgl = S.absScan.map(function(r){ return r.tanggal; }).sort();
+
+  el('aPeta').innerHTML =
+   '<div class="kartu"><h3>Langkah 2 — cocokkan Departemen dengan Area</h3>'+
+     '<div class="mini">Terbaca <b>'+S.absOrang+'</b> pekerja dan <b>'+S.absScan.length+'</b> hari kehadiran, '+
+     'dari <b>'+(tgl[0]||'?')+'</b> sampai <b>'+(tgl[tgl.length-1]||'?')+'</b>. '+
+     'Mesin finger memakai nama Departemen, sistem ini memakai Area — cocokkan sekali, nanti diingat.</div>'+
+     '<div class="gulir" style="margin-top:10px"><table><thead><tr>'+
+       '<th style="min-width:220px">Departemen di mesin finger</th><th style="width:170px">Masuk ke area</th><th style="width:90px">Orang</th>'+
+     '</tr></thead><tbody>'+
+     S.absDep.map(function(d){
+       var pilih = simpan[d] || tebakArea(d);
+       var jml = {}; S.absScan.forEach(function(r){ if(r.dep===d) jml[r.nama]=1; });
+       return '<tr><td><b>'+esc(d)+'</b></td>'+
+         '<td><select data-dep="'+esc(d)+'"><option value="">— pilih —</option>'+
+           S.master.area.map(function(a){ return '<option'+(a===pilih?' selected':'')+'>'+a+'</option>'; }).join('')+
+         '</select></td>'+
+         '<td class="angka">'+Object.keys(jml).length+'</td></tr>';
+     }).join('')+'</tbody></table></div>'+
+     '<label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:400">'+
+       '<input type="checkbox" id="aTambahOrang" style="width:auto" checked> '+
+       'Tambahkan pekerja yang belum terdaftar ke menu Master secara otomatis</label>'+
+     '<div class="mini" style="margin-top:4px">Nama, PIN finger, jabatan, dan area diambil dari berkas. Tarif harian tetap Anda isi sendiri nanti.</div>'+
+     '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'+
+       '<button class="btn a3 kecil" id="aLihat">Lihat contoh hasil</button>'+
+       '<button class="btn kecil" id="aImpor">Impor ke absensi</button>'+
+     '</div>'+
+     '<div id="aContoh" style="margin-top:12px"></div>'+
+   '</div>';
+  el('aLihat').onclick = gambarContohScan;
+  el('aImpor').onclick = imporScanLog;
+  gambarContohScan();
+}
+
+function barisScanSiap(){
+  var peta = {};
+  [].forEach.call(document.querySelectorAll('[data-dep]'), function(sel){ peta[sel.dataset.dep] = sel.value; });
+  return S.absScan.map(function(r){
+    return {pin:r.pin, nama:r.nama, jabatan:r.jabatan, tanggal:r.tanggal,
+            jamMasuk:r.jamMasuk, jamKeluar:r.jamKeluar, area:peta[r.dep]||''};
+  }).filter(function(r){ return r.area; });
+}
+
+function gambarContohScan(){
+  var b = barisScanSiap();
+  var belum = S.absDep.filter(function(d){
+    var s = document.querySelector('[data-dep="'+d.replace(/"/g,'\\"')+'"]'); return s && !s.value;
+  });
+  el('aContoh').innerHTML =
+    (belum.length ? '<div class="pesan info">Departemen ini belum dipilih areanya dan akan dilewati: <b>'+belum.map(esc).join(', ')+'</b></div>' : '')+
+    '<div class="mini" style="margin:6px 0">Siap diimpor: <b>'+b.length+'</b> baris kehadiran.</div>'+
+    (b.length ? '<div class="gulir"><table><thead><tr><th>PIN</th><th>Nama</th><th>Area</th><th>Tanggal</th><th>Masuk</th><th>Keluar</th></tr></thead><tbody>'+
+      b.slice(0,6).map(function(r){
+        return '<tr><td>'+esc(r.pin)+'</td><td>'+esc(r.nama)+'</td><td>'+esc(r.area)+'</td>'+
+               '<td>'+esc(r.tanggal)+'</td><td>'+esc(r.jamMasuk)+'</td><td>'+esc(r.jamKeluar||'—')+'</td></tr>';
+      }).join('')+'</tbody></table></div>' : '');
+}
+
+function imporScanLog(){
+  var b = barisScanSiap();
+  if(!b.length){ kabar('Belum ada departemen yang dipilih areanya.','bad'); return; }
+  if(!confirm('Akan diimpor '+b.length+' baris kehadiran.\n\nAbsensi lama pada tanggal dan area yang sama akan ditimpa. Lanjutkan?')) return;
+
+  var peta = [];
+  [].forEach.call(document.querySelectorAll('[data-dep]'), function(sel){
+    if(sel.value) peta.push(sel.dataset.dep+'='+sel.value);
+  });
+
+  sibuk(true,'Mengimpor absensi...');
+  api('absensiImpor',{baris:b, tambahPekerja: el('aTambahOrang').checked})
+   .then(function(j){
+      if(S.peran==='manajemen'){
+        api('settingSimpan',{data:{petaDepartemen: peta.join(';')}}).catch(function(){});
+        S.master.setting.petaDepartemen = peta.join(';');
+      }
+      if(j.karyawan) S.master.karyawan = j.karyawan;
+      sibuk(false);
+      el('aHasil').innerHTML = '<div class="pesan ok"><b>'+j.masuk+'</b> baris kehadiran masuk, mencakup <b>'+j.hari+'</b> hari-area.'+
+        (j.jmlPekerjaBaru ? '<div style="margin-top:8px">'+j.jmlPekerjaBaru+' pekerja baru ditambahkan ke Master: '+
+           j.pekerjaBaru.map(esc).join(', ')+'<br><span style="font-size:12px">Lengkapi tarif hariannya di menu Master.</span></div>' : '')+
+        (j.jmlTakCocok ? '<div style="margin-top:8px">'+j.jmlTakCocok+' dilewati: <b>'+j.takCocok.map(esc).join(', ')+'</b></div>' : '')+
+        '</div>';
+      el('aFile').value=''; el('aPeta').innerHTML=''; muatRekapAbsensi();
+   })
+   .catch(function(e){ sibuk(false); el('aHasil').innerHTML='<div class="pesan bad">'+esc(e.message)+'</div>'; });
 }
 
 function tebakKolom(kepala, kata){
@@ -1017,7 +1171,7 @@ function imporAbsensi(){
   if(!b.length){ kabar('Tidak ada baris yang bisa diimpor.','bad'); return; }
   if(!confirm('Akan diimpor '+b.length+' baris kehadiran.\n\nAbsensi lama pada tanggal dan area yang sama akan ditimpa. Lanjutkan?')) return;
   sibuk(true,'Mengimpor absensi...');
-  api('absensiImpor',{baris:b, areaBawaan:S.area})
+  api('absensiImpor',{baris:b, areaBawaan:S.area, tambahPekerja:false})
    .then(function(j){
       sibuk(false);
       el('aHasil').innerHTML = '<div class="pesan ok"><b>'+j.masuk+'</b> baris kehadiran masuk, mencakup <b>'+j.hari+'</b> hari-area.'+
@@ -1388,6 +1542,26 @@ function pgSetelan(){
     api('ping').then(function(j){ sibuk(false); kabar(j.pesan); }).catch(function(e){ sibuk(false); kabar(e.message,'bad'); });
   };
 }
+
+/* Masuk kembali otomatis setelah refresh (berlaku 12 jam).
+   HARUS diletakkan paling akhir — semua fungsi dan daftar MENU
+   sudah siap sebelum mulai() dipanggil. */
+(function(){
+  var sesi = null;
+  try { sesi = JSON.parse(localStorage.getItem('ins_sesi')||'null'); } catch(e){}
+  if(sesi && sesi.nama && S.url && (Date.now()-sesi.waktu) < 12*3600*1000){
+    S.nama = sesi.nama; S.peran = sesi.peran;
+    simpanSesi();
+    try { mulai(); }
+    catch(e){
+      // kalau gagal, jangan tinggalkan layar kosong — kembalikan ke gerbang
+      localStorage.removeItem('ins_sesi');
+      el('app').classList.add('sembunyi');
+      el('gerbang').classList.remove('sembunyi');
+      el('gPesan').innerHTML = '<div class="pesan bad">Sesi tidak bisa dipulihkan. Silakan masuk lagi.</div>';
+    }
+  }
+})();
 </script>
 </body>
 </html>
